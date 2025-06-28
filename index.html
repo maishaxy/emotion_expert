@@ -15,27 +15,65 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
 
-    /* --- desktop / tablet --- */
-    body{background:linear-gradient(135deg,#f5f7fa 0%,#e4e7f1 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
-    .journal-container{width:100%;max-width:900px;background:#fff;border-radius:20px;box-shadow:0 15px 50px rgba(0,0,0,.15);overflow:hidden;position:relative}
+    /* ---------- desktop / tablet ---------- */
+    body{
+      background:linear-gradient(135deg,#f5f7fa 0%,#e4e7f1 100%);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px
+    }
+    .journal-container{
+      width:100%;
+      max-width:900px;
+      background:#fff;
+      border-radius:20px;
+      box-shadow:0 15px 50px rgba(0,0,0,.15);
+      overflow:hidden;
+      position:relative
+    }
 
-    /* --- mobile clean mode (≤600 px) --- */
+    /* ---------- mobile clean mode ≤600 px ---------- */
     @media(max-width:600px){
-      body{padding:0;background:#fff}
-      .journal-container{max-width:100%;border-radius:0;box-shadow:none}
+      body{
+        display:block;                                   /* no flex-centering → no odd left gap */
+        padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left); /* respect iOS notch insets */
+        background:#fff
+      }
+      .journal-container{
+        max-width:100%;
+        border-radius:0;
+        box-shadow:none
+      }
       .journal-content{padding:20px 15px}
-      .emotion-section,.journal-section,.intensity-container{background:#fff;box-shadow:none;padding:15px;border-radius:0}
+      .emotion-section,.journal-section,.intensity-container{
+        background:#fff;
+        box-shadow:none;
+        padding:15px;
+        border-radius:0
+      }
       .section-title{font-size:1.2rem}
       .journal-header h1{font-size:1.8rem}
       .journal-header p{font-size:.95rem}
       .emotion-grid{grid-gap:12px}
     }
 
-    /* green disclaimer */
-    .disclaimer-top{background:#27ae60;color:#fff;text-align:center;padding:10px 20px;font-size:.85rem;display:flex;align-items:center;justify-content:center;gap:8px}
+    /* --------------- common styling --------------- */
+    .disclaimer-top{
+      background:#27ae60;
+      color:#fff;
+      text-align:center;
+      padding:10px 20px;
+      font-size:.85rem;
+      display:flex;align-items:center;justify-content:center;gap:8px
+    }
     .disclaimer-top i{font-size:1rem}
 
-    .journal-header{background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);color:#fff;text-align:center;padding:25px 20px 30px;position:relative}
+    .journal-header{
+      background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);
+      color:#fff;text-align:center;padding:25px 20px 30px;position:relative
+    }
     .journal-header h1{font-size:2.3rem;margin-bottom:10px;text-shadow:0 2px 4px rgba(0,0,0,.2)}
     .journal-header p{font-size:1.05rem;max-width:600px;margin:0 auto;opacity:.9}
     .date-display{background:rgba(255,255,255,.2);display:inline-block;padding:6px 18px;border-radius:30px;margin-top:12px;font-weight:600}
@@ -43,19 +81,28 @@
     .journal-content{padding:30px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
     @media(max-width:768px){.journal-content{grid-template-columns:1fr}}
 
-    .emotion-section,.journal-section{background:#f8f9fc;border-radius:15px;padding:25px;box-shadow:0 5px 15px rgba(0,0,0,.05)}
-    .section-title{display:flex;align-items:center;gap:10px;margin-bottom:20px;color:#2c3e50;font-size:1.4rem}
-    .section-title i{background:#4A90E2;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff}
+    .emotion-section,.journal-section{
+      background:#f8f9fc;border-radius:15px;padding:25px;box-shadow:0 5px 15px rgba(0,0,0,.05)
+    }
+    .section-title{
+      display:flex;align-items:center;gap:10px;margin-bottom:20px;color:#2c3e50;font-size:1.4rem
+    }
+    .section-title i{
+      background:#4A90E2;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff
+    }
 
-    /* responsive emotion grid */
+    /* emotion buttons */
     .emotion-grid{display:grid;grid-gap:15px;grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
-    .emotion-option{display:flex;align-items:center;padding:12px 15px;border-radius:10px;cursor:pointer;transition:.3s;font-weight:500;border:2px solid #e0e4ed;background:#fff;min-width:0}
+    .emotion-option{
+      display:flex;align-items:center;padding:12px 15px;border-radius:10px;cursor:pointer;transition:.3s;font-weight:500;
+      border:2px solid #e0e4ed;background:#fff;min-width:0
+    }
     .emotion-option:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,.1)}
     .emotion-option.selected{border-width:3px;transform:scale(1.03)}
-    .emotion-option.dominant{transform:scale(1.10);border-width:4px;box-shadow:0 0 0 4px rgba(0,0,0,.08);color:#fff!important}
+    .emotion-option.dominant{transform:scale(1.1);border-width:4px;box-shadow:0 0 0 4px rgba(0,0,0,.08);color:#fff!important}
     .emotion-color{width:24px;height:24px;border-radius:50%;margin-right:12px;border:2px solid rgba(0,0,0,.1)}
 
-    /* palette */
+    /* colour palette */
     .joy{color:#FFC107;border-color:#FFC107}.sadness{color:#2196F3;border-color:#2196F3}
     .anger{color:#F44336;border-color:#F44336}.fear{color:#9C27B0;border-color:#9C27B0}
     .disgust{color:#4CAF50;border-color:#4CAF50}.surprise{color:#FF9800;border-color:#FF9800}
@@ -79,6 +126,7 @@
     .emotion-option.dominant.disgust{background:#4CAF50}.emotion-option.dominant.surprise{background:#FF9800}
     .emotion-option.dominant.love{background:#E91E63}.emotion-option.dominant.calm{background:#00BCD4}
 
+    /* intensity */
     .intensity-container{background:#fff;padding:20px;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.05)}
     .intensity-slider{width:100%;height:12px;-webkit-appearance:none;background:linear-gradient(to right,#00BCD4,#FFC107,#F44336);border-radius:10px;outline:none;margin:25px 0 15px}
     .intensity-slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #4A90E2;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.3)}
@@ -87,11 +135,13 @@
     .intensity-visual{display:flex;justify-content:space-between;margin-top:10px}
     .intensity-dot{width:10px;height:10px;border-radius:50%;background:#ddd}.intensity-dot.active{background:#4A90E2}
 
+    /* prompts */
     .writing-prompt{margin-bottom:15px;font-weight:600;color:#2c3e50;display:flex;align-items:center;gap:10px}
-    .writing-prompt i{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem}
+    .writing-prompt i{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem}
     .write-box{width:100%;min-height:120px;padding:15px;border:2px solid #e0e4ed;border-radius:12px;font-size:1rem;resize:vertical;margin-bottom:20px;transition:border-color .3s;white-space:pre-wrap;overflow:auto}
     .write-box:focus{outline:none;border-color:#4A90E2}
 
+    /* footer */
     .journal-footer{text-align:center;padding:20px;background:#f8f9fc;border-top:1px solid #e0e4ed;display:flex;flex-direction:column;align-items:center}
     .print-btn{background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);color:#fff;border:none;padding:14px 35px;font-size:1.05rem;font-weight:600;border-radius:50px;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:0 5px 20px rgba(58,123,213,.4);transition:.3s}
     .print-btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(58,123,213,.5)}
@@ -99,17 +149,19 @@
     .bookmark-tip{margin-top:15px;padding:12px 20px;background:linear-gradient(135deg,#FFC107 0%,#FF9800 100%);color:#fff;border-radius:50px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 3px 10px rgba(255,152,0,.3);animation:pulse 2s infinite}
     @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
 
+    /* overlay */
     .loading-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.9);display:flex;justify-content:center;align-items:center;flex-direction:column;z-index:1000;border-radius:20px;opacity:0;pointer-events:none;transition:.3s}
     .loading-overlay.active{opacity:1;pointer-events:all}
     .spinner{width:50px;height:50px;border:5px solid rgba(74,144,226,.2);border-top:5px solid #4A90E2;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
     @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
     .loading-text{font-size:1.1rem;color:#2c3e50;font-weight:500}
 
+    /* nav arrows */
     .nav-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.7);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;color:#4A90E2;box-shadow:0 2px 10px rgba(0,0,0,.1);z-index:100;transition:.3s}
     .nav-arrow:hover{background:#fff;transform:translateY(-50%) scale(1.1)}
     .nav-arrow.left{left:10px}.nav-arrow.right{right:10px}.nav-arrow.disabled{opacity:.3;cursor:not-allowed;transform:translateY(-50%)}
 
-    /* remove all fancy extras in print */
+    /* print simplification */
     @media print{
       body{background:#fff;padding:0}
       .journal-container{max-width:100%;border-radius:0;box-shadow:none}
@@ -126,7 +178,7 @@
   </style>
 
   <!-- copy-protection CSS -->
-  <style id="copy-protect-css">
+  <style>
     body,body *{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important}
     textarea,input,[contenteditable="true"],textarea *,input *,[contenteditable="true"] *{-webkit-user-select:text!important;-moz-user-select:text!important;-ms-user-select:text!important;user-select:text!important}
   </style>
@@ -134,39 +186,39 @@
 
 <body>
   <div class="journal-container">
-    <!-- disclaimer -->
+
     <div class="disclaimer-top"><i class="fas fa-lock"></i> Disclaimer: This journal stores data only in your browser's local storage for 30&nbsp;days. Your entries remain private on your device.</div>
 
-    <!-- loader -->
     <div class="loading-overlay" id="loading-overlay"><div class="spinner"></div><div class="loading-text">Generating your PDF journal…</div></div>
 
-    <!-- nav arrows -->
     <div class="nav-arrow left disabled"  id="prev-day"><i class="fas fa-chevron-left"></i></div>
     <div class="nav-arrow right disabled" id="next-day"><i class="fas fa-chevron-right"></i></div>
 
-    <!-- header -->
-    <div class="journal-header"><h1>Daily Emotion Journal</h1><p>Track your feelings and emotional patterns in a single, focused session</p><div class="date-display" id="current-date">Thursday,&nbsp;June&nbsp;28,&nbsp;2025</div></div>
+    <div class="journal-header">
+      <h1>Daily Emotion Journal</h1>
+      <p>Track your feelings and emotional patterns in a single, focused session</p>
+      <div class="date-display" id="current-date">Thursday,&nbsp;June&nbsp;28,&nbsp;2025</div>
+    </div>
 
-    <!-- main -->
     <div class="journal-content">
       <div class="emotion-section">
         <h2 class="section-title"><i class="fas fa-heart"></i> Your Emotions Today</h2>
         <div class="emotion-grid">
-          <div class="emotion-option joy"      data-emotion="joy"     ><div class="emotion-color joy-bg"></div><div>Joy</div></div>
-          <div class="emotion-option sadness"  data-emotion="sadness" ><div class="emotion-color sadness-bg"></div><div>Sadness</div></div>
-          <div class="emotion-option anger"    data-emotion="anger"   ><div class="emotion-color anger-bg"></div><div>Anger</div></div>
-          <div class="emotion-option fear"     data-emotion="fear"    ><div class="emotion-color fear-bg"></div><div>Fear</div></div>
-          <div class="emotion-option disgust"  data-emotion="disgust" ><div class="emotion-color disgust-bg"></div><div>Disgust</div></div>
+          <div class="emotion-option joy"      data-emotion="joy"><div class="emotion-color joy-bg"></div><div>Joy</div></div>
+          <div class="emotion-option sadness"  data-emotion="sadness"><div class="emotion-color sadness-bg"></div><div>Sadness</div></div>
+          <div class="emotion-option anger"    data-emotion="anger"><div class="emotion-color anger-bg"></div><div>Anger</div></div>
+          <div class="emotion-option fear"     data-emotion="fear"><div class="emotion-color fear-bg"></div><div>Fear</div></div>
+          <div class="emotion-option disgust"  data-emotion="disgust"><div class="emotion-color disgust-bg"></div><div>Disgust</div></div>
           <div class="emotion-option surprise" data-emotion="surprise"><div class="emotion-color surprise-bg"></div><div>Surprise</div></div>
-          <div class="emotion-option love"     data-emotion="love"    ><div class="emotion-color love-bg"></div><div>Love</div></div>
-          <div class="emotion-option calm"     data-emotion="calm"    ><div class="emotion-color calm-bg"></div><div>Calm</div></div>
+          <div class="emotion-option love"     data-emotion="love"><div class="emotion-color love-bg"></div><div>Love</div></div>
+          <div class="emotion-option calm"     data-emotion="calm"><div class="emotion-color calm-bg"></div><div>Calm</div></div>
         </div>
 
         <div class="intensity-container">
           <h2 class="section-title"><i class="fas fa-sliders-h"></i> Emotional Intensity</h2>
           <input type="range" min="1" max="10" value="5" class="intensity-slider" id="intensity-slider">
           <div class="intensity-labels"><span>Low</span><span>Medium</span><span>High</span></div>
-          <div class="intensity-value" id="intensity-value">5&nbsp;-&nbsp;Medium</div>
+          <div class="intensity-value" id="intensity-value">5 - Medium</div>
           <div class="intensity-visual" id="intensity-visual">
             <div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div>
             <div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div>
@@ -176,31 +228,31 @@
 
       <div class="journal-section">
         <h2 class="section-title"><i class="fas fa-pencil-alt"></i> Journal Prompts</h2>
-        <div class="writing-prompt"><i class="fas fa-bolt" style="background:#F44336"></i> Trigger&nbsp;(What happened today?)</div>
-        <textarea class="write-box" id="trigger-box"   placeholder="Describe the event or situation that triggered your emotions..."></textarea>
 
-        <div class="writing-prompt"><i class="fas fa-brain" style="background:#9C27B0"></i> Response&nbsp;(Thoughts/Actions/Body)</div>
-        <textarea class="write-box" id="response-box"  placeholder="How did you respond? What thoughts came up? Any physical sensations?..."></textarea>
+        <div class="writing-prompt"><i class="fas fa-bolt" style="background:#F44336"></i> Trigger (What happened today?)</div>
+        <textarea class="write-box" id="trigger-box"></textarea>
 
-        <div class="writing-prompt"><i class="fas fa-lightbulb" style="background:#FFC107"></i> Learning&nbsp;/&nbsp;Insight</div>
-        <textarea class="write-box" id="learning-box" placeholder="What did you learn about yourself or the situation?..."></textarea>
+        <div class="writing-prompt"><i class="fas fa-brain" style="background:#9C27B0"></i> Response (Thoughts/Actions/Body)</div>
+        <textarea class="write-box" id="response-box"></textarea>
+
+        <div class="writing-prompt"><i class="fas fa-lightbulb" style="background:#FFC107"></i> Learning / Insight</div>
+        <textarea class="write-box" id="learning-box"></textarea>
 
         <div class="writing-prompt"><i class="fas fa-gratipay" style="background:#E91E63"></i> Gratitude</div>
-        <textarea class="write-box" id="gratitude-box" placeholder="What are you grateful for today?..."></textarea>
+        <textarea class="write-box" id="gratitude-box"></textarea>
 
         <div class="writing-prompt"><i class="fas fa-forward" style="background:#00BCD4"></i> Action for Tomorrow</div>
-        <textarea class="write-box" id="action-box"    placeholder="What small step will you take tomorrow?..."></textarea>
+        <textarea class="write-box" id="action-box"></textarea>
       </div>
     </div>
 
-    <!-- footer -->
     <div class="journal-footer">
       <button class="print-btn" id="pdf-button"><i class="fas fa-file-pdf"></i> Download PDF Journal</button>
       <div class="bookmark-tip"><i class="fas fa-bookmark"></i> Tip: Bookmark this page to use it daily!</div>
     </div>
   </div>
 
-  <!-- ───────── MAIN JS ───────── -->
+  <!-- ───────── JS ───────── -->
   <script>
   window.addEventListener('load',()=>{
     const{jsPDF}=window.jspdf;
@@ -271,7 +323,7 @@
 
       const e=entries[k];
       if(e){
-        e.emotions?.forEach(em=>{document.querySelector(`.emotion-option[data-emotion="${em}"]`)?.classList.add('selected')});
+        e.emotions?.forEach(em=>document.querySelector(`.emotion-option[data-emotion="${em}"]`)?.classList.add('selected'));
         const dom=e.emotions?.slice(-1)[0];if(dom)document.querySelector(`.emotion-option[data-emotion="${dom}"]`)?.classList.add('dominant');
         if(e.intensity)intensitySlider.value=e.intensity;
         if(e.trigger)triggerBox.value=e.trigger;
@@ -315,7 +367,7 @@
       nextDayBtn.classList.toggle('disabled',tomorrow>new Date());
     }
 
-    /* ── PDF GENERATION (shade-free) ─────────────────────────── */
+    /* -------- PDF GENERATION (shade-free, single-column) ------- */
     function generatePDF(){
       saveEntry();
       loadingOverlay.classList.add('active');
@@ -323,24 +375,46 @@
       const element=document.querySelector('.journal-container');
       const clone=element.cloneNode(true);
 
-      /* hide UI & shades */
+      /* hide UI bits */
       clone.querySelector('#loading-overlay').style.display='none';
       clone.querySelectorAll('.nav-arrow,.journal-footer,.disclaimer-top').forEach(el=>el.style.display='none');
+
+      /* convert to single column & strip extras */
+      const jc=clone.querySelector('.journal-content');
+      jc.style.display='block';
+      jc.style.gridTemplateColumns='1fr';
+      jc.style.padding='0 0 0 0';
+
       clone.querySelectorAll('*').forEach(el=>{
         el.style.boxShadow='none';
-        /* replace light grey bg (#f8f9fc) */
         if(getComputedStyle(el).backgroundColor.match(/248, 249, 252/))el.style.background='#ffffff';
+        if(el.classList.contains('emotion-section')||el.classList.contains('journal-section')){
+          el.style.background='#ffffff';
+          el.style.border='none';
+          el.style.padding='15px 0';
+        }
       });
 
+      /* render textarea text */
       clone.querySelectorAll('.write-box').forEach(t=>{
-        const d=document.createElement('div');d.className='write-box';d.style.minHeight='120px';d.style.whiteSpace='pre-wrap';d.textContent=t.value;t.parentNode.replaceChild(d,t);
+        const d=document.createElement('div');
+        d.className='write-box';
+        d.style.minHeight='120px';
+        d.style.whiteSpace='pre-wrap';
+        d.textContent=t.value;
+        t.parentNode.replaceChild(d,t);
       });
 
-      clone.style.boxShadow='none';clone.style.borderRadius='0';clone.style.position='absolute';clone.style.left='-9999px';clone.style.width='900px';
+      clone.style.boxShadow='none';
+      clone.style.borderRadius='0';
+      clone.style.position='absolute';
+      clone.style.left='-9999px';
+      clone.style.width='800px'; /* narrower for single column */
       document.body.appendChild(clone);
 
       html2canvas(clone,{scale:1,backgroundColor:'#ffffff',useCORS:true,allowTaint:true,logging:false}).then(canvas=>{
         document.body.removeChild(clone);
+
         const img=canvas.toDataURL('image/jpeg',0.85);
         const pdf=new jsPDF('p','mm','a4',true);
 
