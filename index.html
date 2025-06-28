@@ -11,18 +11,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
+/* ——————————————————— core layout ——————————————————— */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
-
-/* —— desktop / tablet —— */
-body{
-  background:linear-gradient(135deg,#f5f7fa 0%,#e4e7f1 100%);
-  min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+body{background:linear-gradient(135deg,#f5f7fa 0%,#e4e7f1 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
 .journal-container{width:100%;max-width:900px;background:#fff;border-radius:20px;box-shadow:0 15px 50px rgba(0,0,0,.15);overflow:hidden;position:relative}
 
-/* —— mobile (≤600 px) —— */
+/* ——————————————————— mobile   ≤600 px ——————————————————— */
 @media(max-width:600px){
-  body{
-    display:block;background:#fff;padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left)}
+  body{display:block;background:#fff;padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left)}
   .journal-container{max-width:100%;border-radius:0;box-shadow:none}
   .journal-content{padding:20px 15px}
   .emotion-section,.journal-section,.intensity-container{background:#fff;box-shadow:none;padding:15px;border-radius:0}
@@ -32,7 +28,7 @@ body{
   .emotion-grid{grid-gap:12px}
 }
 
-/* —— common —— */
+/* ——————————————————— header & disclaimer ——————————————————— */
 .disclaimer-top{background:#27ae60;color:#fff;text-align:center;padding:10px 20px;font-size:.85rem;display:flex;align-items:center;justify-content:center;gap:8px}
 .disclaimer-top i{font-size:1rem}
 .journal-header{background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);color:#fff;text-align:center;padding:25px 20px 30px;position:relative}
@@ -40,29 +36,29 @@ body{
 .journal-header p{font-size:1.05rem;max-width:600px;margin:0 auto;opacity:.9}
 .date-display{background:rgba(255,255,255,.2);display:inline-block;padding:6px 18px;border-radius:30px;margin-top:12px;font-weight:600}
 
+/* ——————————————————— grid layout ——————————————————— */
 .journal-content{padding:30px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
 @media(max-width:768px){.journal-content{grid-template-columns:1fr}}
-
 .emotion-section,.journal-section{background:#f8f9fc;border-radius:15px;padding:25px;box-shadow:0 5px 15px rgba(0,0,0,.05)}
 .section-title{display:flex;align-items:center;gap:10px;margin-bottom:20px;color:#2c3e50;font-size:1.4rem}
 .section-title i{background:#4A90E2;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff}
 
+/* ——————————————————— emotions ——————————————————— */
 .emotion-grid{display:grid;grid-gap:15px;grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
 .emotion-option{display:flex;align-items:center;padding:12px 15px;border-radius:10px;cursor:pointer;transition:.3s;font-weight:500;border:2px solid #e0e4ed;background:#fff;min-width:0}
 .emotion-option:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,.1)}
 .emotion-option.selected{border-width:3px;transform:scale(1.03)}
 .emotion-option.dominant{transform:scale(1.1);border-width:4px;box-shadow:0 0 0 4px rgba(0,0,0,.08);color:#fff!important}
 .emotion-color{width:24px;height:24px;border-radius:50%;margin-right:12px;border:2px solid rgba(0,0,0,.1)}
-
+/* palette */
 .joy{color:#FFC107;border-color:#FFC107}.sadness{color:#2196F3;border-color:#2196F3}
 .anger{color:#F44336;border-color:#F44336}.fear{color:#9C27B0;border-color:#9C27B0}
 .disgust{color:#4CAF50;border-color:#4CAF50}.surprise{color:#FF9800;border-color:#FF9800}
 .love{color:#E91E63;border-color:#E91E63}.calm{color:#00BCD4;border-color:#00BCD4}
-
 .joy-bg{background:#FFC107}.sadness-bg{background:#2196F3}.anger-bg{background:#F44336}
 .fear-bg{background:#9C27B0}.disgust-bg{background:#4CAF50}.surprise-bg{background:#FF9800}
 .love-bg{background:#E91E63}.calm-bg{background:#00BCD4}
-
+/* selected tints */
 .emotion-option.selected.joy{background:rgba(255,193,7,.15)}
 .emotion-option.selected.sadness{background:rgba(33,150,243,.15)}
 .emotion-option.selected.anger{background:rgba(244,67,54,.15)}
@@ -71,12 +67,13 @@ body{
 .emotion-option.selected.surprise{background:rgba(255,152,0,.15)}
 .emotion-option.selected.love{background:rgba(233,30,99,.15)}
 .emotion-option.selected.calm{background:rgba(0,188,212,.15)}
-
+/* dominant */
 .emotion-option.dominant.joy{background:#FFC107}.emotion-option.dominant.sadness{background:#2196F3}
 .emotion-option.dominant.anger{background:#F44336}.emotion-option.dominant.fear{background:#9C27B0}
 .emotion-option.dominant.disgust{background:#4CAF50}.emotion-option.dominant.surprise{background:#FF9800}
 .emotion-option.dominant.love{background:#E91E63}.emotion-option.dominant.calm{background:#00BCD4}
 
+/* ——————————————————— intensity ——————————————————— */
 .intensity-container{background:#fff;padding:20px;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.05)}
 .intensity-slider{width:100%;height:12px;-webkit-appearance:none;background:linear-gradient(to right,#00BCD4,#FFC107,#F44336);border-radius:10px;outline:none;margin:25px 0 15px}
 .intensity-slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #4A90E2;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.3)}
@@ -85,11 +82,11 @@ body{
 .intensity-visual{display:flex;justify-content:space-between;margin-top:10px}
 .intensity-dot{width:10px;height:10px;border-radius:50%;background:#ddd}.intensity-dot.active{background:#4A90E2}
 
+/* ——————————————————— prompts & footer ——————————————————— */
 .writing-prompt{margin-bottom:15px;font-weight:600;color:#2c3e50;display:flex;align-items:center;gap:10px}
 .writing-prompt i{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem}
 .write-box{width:100%;min-height:120px;padding:15px;border:2px solid #e0e4ed;border-radius:12px;font-size:1rem;resize:vertical;margin-bottom:20px;transition:border-color .3s;white-space:pre-wrap;overflow:auto}
 .write-box:focus{outline:none;border-color:#4A90E2}
-
 .journal-footer{text-align:center;padding:20px;background:#f8f9fc;border-top:1px solid #e0e4ed;display:flex;flex-direction:column;align-items:center}
 .print-btn{background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);color:#fff;border:none;padding:14px 35px;font-size:1.05rem;font-weight:600;border-radius:50px;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:0 5px 20px rgba(58,123,213,.4);transition:.3s}
 .print-btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(58,123,213,.5)}
@@ -97,17 +94,19 @@ body{
 .bookmark-tip{margin-top:15px;padding:12px 20px;background:linear-gradient(135deg,#FFC107 0%,#FF9800 100%);color:#fff;border-radius:50px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 3px 10px rgba(255,152,0,.3);animation:pulse 2s infinite}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}
 
-.loading-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.9);display:flex;justify-content:center;align-items:center;flex-direction:column;z-index:1000;border-radius:20px;opacity:0;pointer-events:none;transition:.3s}
-.loading-overlay.active{opacity:1;pointer-events:all}
+/* ——————————————————— overlay (now hidden by default) ——————————————————— */
+.loading-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.9);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:1000;border-radius:20px}
+.loading-overlay.active{display:flex}
 .spinner{width:50px;height:50px;border:5px solid rgba(74,144,226,.2);border-top:5px solid #4A90E2;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
 @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
 .loading-text{font-size:1.1rem;color:#2c3e50;font-weight:500}
 
+/* ——————————————————— nav arrows ——————————————————— */
 .nav-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.7);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;color:#4A90E2;box-shadow:0 2px 10px rgba(0,0,0,.1);z-index:100;transition:.3s}
 .nav-arrow:hover{background:#fff;transform:translateY(-50%) scale(1.1)}
 .nav-arrow.left{left:10px}.nav-arrow.right{right:10px}.nav-arrow.disabled{opacity:.3;cursor:not-allowed;transform:translateY(-50%)}
 
-/* simplified print */
+/* ——————————————————— print ——————————————————— */
 @media print{
   body{background:#fff;padding:0}
   .journal-container{max-width:100%;border-radius:0;box-shadow:none}
@@ -119,6 +118,7 @@ body{
 </style>
 
 <style>
+/* copy-protection */
 body,body *{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important}
 textarea,input,[contenteditable="true"],textarea *,input *,[contenteditable="true"] *{-webkit-user-select:text!important;-moz-user-select:text!important;-ms-user-select:text!important;user-select:text!important}
 </style>
@@ -126,13 +126,27 @@ textarea,input,[contenteditable="true"],textarea *,input *,[contenteditable="tru
 
 <body>
 <div class="journal-container">
+  <!-- disclaimer -->
   <div class="disclaimer-top"><i class="fas fa-lock"></i> Disclaimer: This journal stores data only in your browser's local storage for 30&nbsp;days. Your entries remain private on your device.</div>
-  <div class="loading-overlay" id="loading-overlay"><div class="spinner"></div><div class="loading-text">Generating your PDF journal…</div></div>
+
+  <!-- overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Generating your PDF journal…</div>
+  </div>
+
+  <!-- nav -->
   <div class="nav-arrow left disabled"  id="prev-day"><i class="fas fa-chevron-left"></i></div>
   <div class="nav-arrow right disabled" id="next-day"><i class="fas fa-chevron-right"></i></div>
 
-  <div class="journal-header"><h1>Daily Emotion Journal</h1><p>Track your feelings and emotional patterns in a single, focused session</p><div class="date-display" id="current-date"></div></div>
+  <!-- header -->
+  <div class="journal-header">
+    <h1>Daily Emotion Journal</h1>
+    <p>Track your feelings and emotional patterns in a single, focused session</p>
+    <div class="date-display" id="current-date"></div>
+  </div>
 
+  <!-- main -->
   <div class="journal-content">
     <div class="emotion-section">
       <h2 class="section-title"><i class="fas fa-heart"></i> Your Emotions Today</h2>
@@ -178,62 +192,73 @@ textarea,input,[contenteditable="true"],textarea *,input *,[contenteditable="tru
     </div>
   </div>
 
-  <div class="journal-footer"><button class="print-btn" id="pdf-button"><i class="fas fa-file-pdf"></i> Download PDF Journal</button><div class="bookmark-tip"><i class="fas fa-bookmark"></i> Tip: Bookmark this page to use it daily!</div></div>
+  <!-- footer -->
+  <div class="journal-footer">
+    <button class="print-btn" id="pdf-button"><i class="fas fa-file-pdf"></i> Download PDF Journal</button>
+    <div class="bookmark-tip"><i class="fas fa-bookmark"></i> Tip: Bookmark this page to use it daily!</div>
+  </div>
 </div>
 
 <script>
 window.addEventListener('load',()=>{
   const{jsPDF}=window.jspdf;
 
+  /* date & helpers */
   const cd=document.getElementById('current-date');
   cd.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-
-  /* helpers */
   const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  let current=new Date(),key=fmt(current),data=JSON.parse(localStorage.getItem('emotionJournalEntries')||'{}');
 
-  /* dom refs */
-  const emoOpts=[...document.querySelectorAll('.emotion-option')],
+  /* state */
+  let current=new Date(),key=fmt(current);
+  let data=JSON.parse(localStorage.getItem('emotionJournalEntries')||'{}');
+
+  /* refs */
+  const opts=[...document.querySelectorAll('.emotion-option')],
         slider=document.getElementById('intensity-slider'),
         iVal=document.getElementById('intensity-value'),
         dots=[...document.querySelectorAll('.intensity-dot')],
         boxes={trigger:document.getElementById('trigger-box'),response:document.getElementById('response-box'),learning:document.getElementById('learning-box'),gratitude:document.getElementById('gratitude-box'),action:document.getElementById('action-box')},
         prev=document.getElementById('prev-day'),next=document.getElementById('next-day'),
-        load=document.getElementById('loading-overlay');
+        overlay=document.getElementById('loading-overlay');
 
+  /* load entry */
   function loadEntry(k){
-    emoOpts.forEach(o=>o.classList.remove('selected','dominant'));
+    opts.forEach(o=>o.classList.remove('selected','dominant'));
     Object.values(boxes).forEach(b=>b.value='');slider.value=5;
-    const e=data[k]; if(e){
-      e.emotions?.forEach(em=>document.querySelector(`.emotion-option[data-emotion="${em}"]`)?.classList.add('selected'));
-      e.emotions?.slice(-1)?.forEach(em=>document.querySelector(`.emotion-option[data-emotion="${em}"]`)?.classList.add('dominant'));
-      slider.value=e.intensity||5;
-      Object.keys(boxes).forEach(id=>{if(e[id])boxes[id].value=e[id]});
-    }
+    const e=data[k]||{};
+    e.emotions?.forEach(em=>document.querySelector(`.emotion-option[data-emotion="${em}"]`)?.classList.add('selected'));
+    e.emotions?.slice(-1)?.forEach(em=>document.querySelector(`.emotion-option[data-emotion="${em}"]`)?.classList.add('dominant'));
+    slider.value=e.intensity||5;
+    Object.keys(boxes).forEach(id=>{if(e[id])boxes[id].value=e[id]});
     updateIntensity();
   }
+
+  /* save entry */
   function saveEntry(){
-    data[key]={
-      date:key,
-      emotions:[...document.querySelectorAll('.emotion-option.selected')].map(el=>el.dataset.emotion),
+    data[key]={date:key,
+      emotions:opts.filter(o=>o.classList.contains('selected')).map(o=>o.dataset.emotion),
       intensity:slider.value,
       trigger:boxes.trigger.value,response:boxes.response.value,
-      learning:boxes.learning.value,gratitude:boxes.gratitude.value,action:boxes.action.value
-    };
+      learning:boxes.learning.value,gratitude:boxes.gratitude.value,action:boxes.action.value};
     localStorage.setItem('emotionJournalEntries',JSON.stringify(data));
     updateNav();
   }
+
+  /* intensity visuals */
   function updateIntensity(){
-    const v=+slider.value;iVal.textContent=`${v} - ${v<=3?'Low':v<=7?'Medium':'High'}`;
+    const v=+slider.value;
+    iVal.textContent=`${v} - ${v<=3?'Low':v<=7?'Medium':'High'}`;
     dots.forEach((d,i)=>d.classList.toggle('active',i<v));
   }
+
+  /* prev/next enable */
   function updateNav(){
     prev.classList.toggle('disabled',!data[fmt(new Date(current.getTime()-864e5))]);
     next.classList.toggle('disabled',new Date(current.getTime()+864e5)>new Date());
   }
 
   /* listeners */
-  emoOpts.forEach(o=>o.addEventListener('click',()=>{o.classList.toggle('selected');document.querySelectorAll('.emotion-option').forEach(e=>e.classList.remove('dominant'));if(o.classList.contains('selected'))o.classList.add('dominant');saveEntry()}));
+  opts.forEach(o=>o.addEventListener('click',()=>{o.classList.toggle('selected');opts.forEach(e=>e.classList.remove('dominant'));if(o.classList.contains('selected'))o.classList.add('dominant');saveEntry()}));
   slider.addEventListener('input',()=>{updateIntensity();saveEntry()});
   Object.values(boxes).forEach(b=>b.addEventListener('input',saveEntry));
   prev.addEventListener('click',()=>{const p=new Date(current);p.setDate(p.getDate()-1);if(data[fmt(p)]){saveEntry();current=p;key=fmt(current);cd.textContent=current.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});loadEntry(key)}});
@@ -242,21 +267,17 @@ window.addEventListener('load',()=>{
 
   loadEntry(key);updateNav();
 
-  /* create PDF with margin */
+  /* PDF with margin */
   function generatePDF(){
-    saveEntry();load.classList.add('active');
+    saveEntry();overlay.classList.add('active');
 
     const clone=document.querySelector('.journal-container').cloneNode(true);
     clone.querySelectorAll('.nav-arrow,.journal-footer,.disclaimer-top,#loading-overlay').forEach(el=>el.remove());
-    const jc=clone.querySelector('.journal-content');
-    jc.style.display='block';jc.style.gridTemplateColumns='1fr';jc.style.padding='20px';  /* << margin for PDF */
 
-    clone.querySelectorAll('.emotion-section,.journal-section').forEach(s=>{
-      s.style.background='#fff';s.style.boxShadow='none';s.style.border='none';s.style.padding='15px 0';
-    });
+    const jc=clone.querySelector('.journal-content');
+    jc.style.display='block';jc.style.gridTemplateColumns='1fr';jc.style.padding='20px'; /* margin */
     clone.querySelectorAll('*').forEach(el=>{el.style.boxShadow='none';});
     clone.querySelectorAll('.write-box').forEach(t=>{const d=document.createElement('div');d.className='write-box';d.style.minHeight='120px';d.style.whiteSpace='pre-wrap';d.textContent=t.value;t.replaceWith(d)});
-
     clone.style.width='800px';clone.style.borderRadius='0';clone.style.boxShadow='none';clone.style.position='absolute';clone.style.left='-9999px';
     document.body.appendChild(clone);
 
@@ -269,7 +290,7 @@ window.addEventListener('load',()=>{
         pos-=pdf.internal.pageSize.getHeight();pdf.addPage();pdf.addImage(c.toDataURL('image/jpeg',0.85),'JPEG',0,pos,w,h,'','FAST');
       }
       pdf.save(`emotion-journal-${key}.pdf`);
-    }).catch(()=>alert('PDF failed, try again')).finally(()=>load.classList.remove('active'));
+    }).catch(()=>alert('PDF failed, try again')).finally(()=>overlay.classList.remove('active'));
   }
 });
 </script>
