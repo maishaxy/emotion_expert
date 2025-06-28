@@ -32,8 +32,9 @@
     .section-title{display:flex;align-items:center;gap:10px;margin-bottom:20px;color:#2c3e50;font-size:1.4rem}
     .section-title i{background:#4A90E2;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff}
 
-    .emotion-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
-    .emotion-option{display:flex;align-items:center;padding:12px 15px;border-radius:10px;cursor:pointer;transition:.3s;font-weight:500;border:2px solid #e0e4ed;background:#fff}
+    /* responsive emotion grid */
+    .emotion-grid{display:grid;grid-gap:15px;grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+    .emotion-option{display:flex;align-items:center;padding:12px 15px;border-radius:10px;cursor:pointer;transition:.3s;font-weight:500;border:2px solid #e0e4ed;background:#fff;min-width:0}
     .emotion-option:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,.1)}
     .emotion-option.selected{border-width:3px;transform:scale(1.03)}
     .emotion-option.dominant{transform:scale(1.10);border-width:4px;box-shadow:0 0 0 4px rgba(0,0,0,.08);color:#fff!important}
@@ -267,11 +268,10 @@
     }
 
     function updateNavButtons(){
-      const prev=new Date(currentDate);prev.setDate(prev.getDate()-1);
-      const prevKey=formatDateKey(prev);
+      const prevKey=formatDateKey(new Date(currentDate.getTime()-86400000)); // one day earlier
       prevDayBtn.classList.toggle('disabled',!entries[prevKey]);
-      const next=new Date(currentDate);next.setDate(next.getDate()+1);
-      nextDayBtn.classList.toggle('disabled',next>new Date());
+      const tomorrow=new Date(currentDate.getTime()+86400000);
+      nextDayBtn.classList.toggle('disabled',tomorrow>new Date());
     }
 
     function generatePDF(){
@@ -283,7 +283,7 @@
       clone.querySelector('#loading-overlay').style.display='none';
       clone.querySelectorAll('.nav-arrow').forEach(el=>el.style.display='none');
       clone.querySelector('.disclaimer-top').style.display='none';
-      clone.style.boxShadow='none';clone.style.borderRadius='0';         /* <<< no grey halo */
+      clone.style.boxShadow='none';clone.style.borderRadius='0';
       clone.querySelectorAll('.write-box').forEach(t=>{
         const div=document.createElement('div');div.className='write-box';div.style.minHeight='120px';div.style.whiteSpace='pre-wrap';div.textContent=t.value;t.parentNode.replaceChild(div,t);});
       clone.style.position='absolute';clone.style.left='-9999px';clone.style.width='900px';document.body.appendChild(clone);
@@ -292,9 +292,20 @@
         document.body.removeChild(clone);
         const img=canvas.toDataURL('image/jpeg',0.85);
         const pdf=new jsPDF('p','mm','a4',true);
-        const w=pdf.internal.pageSize.getWidth();
-        const h=(canvas.height*w)/canvas.width;
-        pdf.addImage(img,'JPEG',0,0,w,h,undefined,'FAST');
+        const pageW=pdf.internal.pageSize.getWidth();
+        const pageH=pdf.internal.pageSize.getHeight();
+        const imgW=pageW;
+        const imgH=canvas.height*pageW/canvas.width;
+
+        let position=0;
+        pdf.addImage(img,'JPEG',0,position,imgW,imgH,'','FAST');
+        let heightLeft=imgH-pageH;
+        while(heightLeft>0){
+          position-=pageH;
+          pdf.addPage();
+          pdf.addImage(img,'JPEG',0,position,imgW,imgH,'','FAST');
+          heightLeft-=pageH;
+        }
         pdf.save(`emotion-journal-${currentDateKey}.pdf`);
       }).catch(e=>{console.error(e);alert('Error generating PDF. Please try again.')})
         .finally(()=>loadingOverlay.classList.remove('active'));
