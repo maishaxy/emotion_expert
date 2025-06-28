@@ -45,7 +45,8 @@ body{background:linear-gradient(135deg,#f5f7fa 0%,#e4e7f1 100%);min-height:100vh
 .emotion-grid{display:grid;gap:15px;grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
 .emotion{display:flex;align-items:center;gap:12px;padding:12px 15px;border:2px solid #e0e4ed;border-radius:10px;background:#fff;cursor:pointer;transition:.3s;font-weight:500}
 .emotion:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,.1)}
-.emotion.sel{border-width:3px;transform:scale(1.03)}
+.emotion.sel{border-width:3px;transform:scale(1.03);color:#fff !important}
+.emotion.sel .dot{border-color:rgba(255,255,255,.5)}
 .emotion.dom{transform:scale(1.1);border-width:4px;box-shadow:0 0 0 4px rgba(0,0,0,.08);color:#fff!important}
 .dot{width:24px;height:24px;border-radius:50%;border:2px solid rgba(0,0,0,.1)}
 /* palette */
@@ -53,6 +54,12 @@ body{background:linear-gradient(135deg,#f5f7fa 0%,#e4e7f1 100%);min-height:100vh
 .ang{color:#F44336;border-color:#F44336}.fear{color:#9C27B0;border-color:#9C27B0}
 .disg{color:#4CAF50;border-color:#4CAF50}.surp{color:#FF9800;border-color:#FF9800}
 .love{color:#E91E63;border-color:#E91E63}.calm{color:#00BCD4;border-color:#00BCD4}
+
+/* Selected emotion backgrounds */
+.emotion.sel.joy{background:#FFC107}.emotion.sel.sad{background:#2196F3}
+.emotion.sel.ang{background:#F44336}.emotion.sel.fear{background:#9C27B0}
+.emotion.sel.disg{background:#4CAF50}.emotion.sel.surp{background:#FF9800}
+.emotion.sel.love{background:#E91E63}.emotion.sel.calm{background:#00BCD4}
 
 .joy-bg{background:#FFC107}.sad-bg{background:#2196F3}.ang-bg{background:#F44336}
 .fear-bg{background:#9C27B0}.disg-bg{background:#4CAF50}.surp-bg{background:#FF9800}
@@ -84,10 +91,51 @@ textarea:focus{outline:none;border-color:#4A90E2}
 .nav:hover{background:#fff;transform:translateY(-50%) scale(1.1)}
 .nav.left{left:10px}.nav.right{right:10px}.nav.dis{opacity:.3;cursor:not-allowed}
 
-@media print{body{background:#fff;padding:0}.journal{max-width:100%;border-radius:0;box-shadow:none}.disclaimer,.nav,.btn,.tip{display:none}}
-</style>
+/* PDF generation styles */
+.pdf-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-<style>
+.pdf-overlay .spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(74, 144, 226, 0.2);
+  border-top: 5px solid #4A90E2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pdf-overlay .message {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: center;
+  max-width: 80%;
+}
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .journal { max-width: 100%; border-radius: 0; box-shadow: none; }
+  .disclaimer, .nav, .btn, .tip { display: none; }
+}
+
 /* copy-friction */
 body,body *{-webkit-user-select:none!important;-moz-user-select:none!important;user-select:none!important}
 textarea,input,[contenteditable],textarea *,input *,[contenteditable] *{-webkit-user-select:text!important;-moz-user-select:text!important;user-select:text!important}
@@ -156,6 +204,11 @@ textarea,input,[contenteditable],textarea *,input *,[contenteditable] *{-webkit-
   <div class="footer"><button class="btn" id="dl"><i class="fas fa-file-pdf"></i> Download PDF Journal</button><div class="tip"><i class="fas fa-bookmark"></i> Tip: bookmark this page!</div></div>
 </div>
 
+<div id="pdf-overlay" class="pdf-overlay" style="display:none;">
+  <div class="spinner"></div>
+  <div class="message">Generating your PDF...</div>
+</div>
+
 <script>
 /* ——————————————————— state helpers ——————————————————— */
 const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -169,6 +222,7 @@ const emo=[...document.querySelectorAll('.emotion')];
 const rng=E('#rng'),rngv=E('#rngv'),dots=[...E('#sc').children];
 const fields={trigger:E('#t_trigger'),response:E('#t_response'),learning:E('#t_learning'),grat:E('#t_grat'),action:E('#t_action')};
 const prev=E('#prev'),next=E('#next'),dl=E('#dl'),root=E('#root');
+const pdfOverlay = E('#pdf-overlay');
 
 /* ——————————————————— ui init ——————————————————— */
 dsp.textContent=cur.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
@@ -219,42 +273,206 @@ function updateNav(){
   next.classList.toggle('dis',new Date(cur.getTime()+864e5)>new Date());
 }
 
-/* ——————————————————— overlay (on-demand) ——————————————————— */
-function overlay(show){
-  let ov=E('#ovbox');
-  if(show){
-    if(!ov){
-      ov=document.createElement('div');ov.id='ovbox';
-      ov.style.cssText='position:fixed;inset:0;background:rgba(255,255,255,.9);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;font:600 1.2rem Segoe UI';
-      ov.innerHTML='<div class="spinner" style="width:50px;height:50px;border:5px solid rgba(74,144,226,.2);border-top:5px solid #4A90E2;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px"></div>Generating your PDF…';
-      document.body.appendChild(ov);
+/* ——————————————————— pdf generation ——————————————————— */
+function generate() {
+  save();
+  pdfOverlay.style.display = 'flex';
+  
+  setTimeout(() => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const margin = 15;
+    let yPos = margin;
+    const pageHeight = doc.internal.pageSize.height;
+    
+    // Add header
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(41, 128, 185);
+    doc.text('Daily Emotion Journal', margin, yPos);
+    
+    yPos += 10;
+    doc.setFontSize(12);
+    doc.setTextColor(44, 62, 80);
+    doc.text(dsp.textContent, margin, yPos);
+    
+    yPos += 15;
+    
+    // Add emotions section
+    doc.setFontSize(18);
+    doc.setTextColor(52, 152, 219);
+    doc.text('Emotional State', margin, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(12);
+    doc.setTextColor(44, 62, 80);
+    
+    // Get selected emotions
+    const selectedEmotions = emo.filter(e => e.classList.contains('sel'));
+    const dominantEmotion = emo.find(e => e.classList.contains('dom'));
+    
+    if (dominantEmotion) {
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Dominant Emotion: ${dominantEmotion.textContent.trim()}`, margin, yPos);
+      yPos += 8;
     }
-  }else ov&&ov.remove();
-}
-
-/* ——————————————————— pdf ——————————————————— */
-function generate(){
-  save();overlay(true);
-  const clone=root.cloneNode(true);
-  clone.querySelectorAll('.nav,.footer,.disclaimer').forEach(n=>n.remove());
-  const ct=clone.querySelector('.content');
-  ct.style.display='block';ct.style.gridTemplateColumns='1fr';ct.style.padding='20px';
-  clone.querySelectorAll('.card').forEach(c=>{c.style.background='#fff';c.style.boxShadow='none';c.style.border='none';c.style.padding='15px 0'});
-  clone.querySelectorAll('.emotion,.section-title i').forEach(e=>e.style.boxShadow='none');
-  clone.querySelectorAll('textarea').forEach(t=>{const d=document.createElement('div');d.className=t.className;d.style.minHeight='120px';d.style.whiteSpace='pre-wrap';d.textContent=t.value;t.replaceWith(d)});
-  clone.style.width='800px';clone.style.position='absolute';clone.style.left='-9999px';clone.style.boxShadow='none';clone.style.borderRadius='0';
-  document.body.appendChild(clone);
-
-  html2canvas(clone,{scale:1,backgroundColor:'#fff'}).then(c=>{
-    clone.remove();
-    const pdf=new jspdf.jsPDF('p','mm','a4',true);
-    const w=pdf.internal.pageSize.getWidth(),h=c.height*w/c.width;
-    let pos=0;pdf.addImage(c.toDataURL('image/jpeg',0.85),'JPEG',0,pos,w,h,'','FAST');
-    for(let rem=h-pdf.internal.pageSize.getHeight();rem>5;rem-=pdf.internal.pageSize.getHeight()){
-      pos-=pdf.internal.pageSize.getHeight();pdf.addPage();pdf.addImage(c.toDataURL('image/jpeg',0.85),'JPEG',0,pos,w,h,'','FAST');
+    
+    if (selectedEmotions.length > 0) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('All Emotions:', margin, yPos);
+      yPos += 8;
+      
+      doc.setFont('helvetica', 'normal');
+      const emotionsList = selectedEmotions.map(e => e.textContent.trim()).join(', ');
+      const emotionsLines = doc.splitTextToSize(emotionsList, doc.internal.pageSize.width - margin * 2);
+      
+      emotionsLines.forEach(line => {
+        if (yPos > pageHeight - margin) {
+          doc.addPage();
+          yPos = margin;
+        }
+        doc.text(line, margin, yPos);
+        yPos += 8;
+      });
     }
-    pdf.save(`emotion-journal-${key}.pdf`);
-  }).catch(()=>alert('PDF failed')).finally(()=>overlay(false));
+    
+    // Add intensity
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Intensity: ${rng.value} (${rng.value <= 3 ? 'Low' : rng.value <= 7 ? 'Medium' : 'High'})`, margin, yPos);
+    yPos += 15;
+    
+    // Add journal prompts section
+    doc.setFontSize(18);
+    doc.setTextColor(52, 152, 219);
+    doc.text('Journal Entries', margin, yPos);
+    yPos += 10;
+    
+    // Add prompts with content
+    const prompts = [
+      {id: 'trigger', title: 'Trigger (What happened today?)'},
+      {id: 'response', title: 'Response (Thoughts / Actions / Body)'},
+      {id: 'learning', title: 'Learning / Insight'},
+      {id: 'grat', title: 'Gratitude'},
+      {id: 'action', title: 'Action for Tomorrow'}
+    ];
+    
+    doc.setFontSize(12);
+    
+    prompts.forEach(prompt => {
+      const content = fields[prompt.id].value.trim();
+      if (content) {
+        // Add prompt title
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(41, 128, 185);
+        
+        // Check if we need a new page
+        if (yPos > pageHeight - margin - 15) {
+          doc.addPage();
+          yPos = margin;
+        }
+        
+        doc.text(prompt.title, margin, yPos);
+        yPos += 8;
+        
+        // Add prompt content with box styling
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(44, 62, 80);
+        
+        // Split content into lines
+        const contentLines = doc.splitTextToSize(content, doc.internal.pageSize.width - margin * 2 - 10);
+        
+        // Draw a box with light shadow
+        const boxHeight = Math.min(
+          contentLines.length * 6 + 10, 
+          pageHeight - yPos - margin - 10
+        );
+        
+        // Draw shadow
+        doc.setDrawColor(200, 200, 200);
+        doc.setFillColor(245, 245, 245);
+        doc.rect(margin + 1, yPos + 1, doc.internal.pageSize.width - margin * 2, boxHeight, 'F');
+        
+        // Draw border
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(margin, yPos, doc.internal.pageSize.width - margin * 2, boxHeight);
+        
+        // Add text inside box
+        let contentY = yPos + 8;
+        contentLines.forEach(line => {
+          if (contentY > yPos + boxHeight - 5) {
+            return; // Skip if beyond box
+          }
+          doc.text(line, margin + 5, contentY);
+          contentY += 6;
+        });
+        
+        yPos += boxHeight + 8; // Move to next position
+        
+        // Check if we need to continue on next page
+        if (contentLines.length * 6 + 10 > boxHeight) {
+          const remainingLines = contentLines.slice(Math.floor(boxHeight / 6) - 1);
+          
+          // Process remaining lines on new pages
+          let currentLines = remainingLines;
+          while (currentLines.length > 0) {
+            doc.addPage();
+            yPos = margin;
+            
+            // Draw continuation box
+            const contBoxHeight = Math.min(
+              currentLines.length * 6 + 15, 
+              pageHeight - margin * 2
+            );
+            
+            // Draw box for continuation
+            doc.setDrawColor(200, 200, 200);
+            doc.setFillColor(245, 245, 245);
+            doc.rect(margin + 1, yPos + 1, doc.internal.pageSize.width - margin * 2, contBoxHeight, 'F');
+            doc.setDrawColor(200, 200, 200);
+            doc.rect(margin, yPos, doc.internal.pageSize.width - margin * 2, contBoxHeight);
+            
+            // Add continuation header
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(41, 128, 185);
+            doc.text(`${prompt.title} (continued)`, margin + 5, yPos + 8);
+            
+            // Add content
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(44, 62, 80);
+            let contY = yPos + 15;
+            
+            const maxLines = Math.floor((contBoxHeight - 15) / 6);
+            const linesToShow = currentLines.slice(0, maxLines);
+            currentLines = currentLines.slice(maxLines);
+            
+            linesToShow.forEach(line => {
+              if (contY > yPos + contBoxHeight - 5) return;
+              doc.text(line, margin + 5, contY);
+              contY += 6;
+            });
+            
+            yPos += contBoxHeight + 8;
+          }
+        }
+      }
+    });
+    
+    // Add footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for(let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.setTextColor(127, 140, 141);
+      doc.text(`Page ${i} of ${pageCount}`, 
+        doc.internal.pageSize.width - margin - 30, 
+        doc.internal.pageSize.height - 10
+      );
+    }
+    
+    // Save and close
+    doc.save(`emotion-journal-${key}.pdf`);
+    pdfOverlay.style.display = 'none';
+  }, 500);
 }
 
 /* ——————————————————— copy-friction JS ——————————————————— */
