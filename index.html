@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, noarchive">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daily Emotion Journal</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,288 +10,261 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
-/* ——————————————————— core layout ——————————————————— */
+/* — basic layout (desktop) — */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
 body{background:linear-gradient(135deg,#f5f7fa 0%,#e4e7f1 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
-.journal-container{width:100%;max-width:900px;background:#fff;border-radius:20px;box-shadow:0 15px 50px rgba(0,0,0,.15);overflow:hidden;position:relative}
+.journal{width:100%;max-width:900px;background:#fff;border-radius:20px;box-shadow:0 15px 50px rgba(0,0,0,.15);overflow:hidden;position:relative}
 
-/* ——————————————————— mobile   ≤600 px ——————————————————— */
+/* — tighter mobile view ≤600px — */
 @media(max-width:600px){
-  body{display:block;background:#fff;padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left)}
-  .journal-container{max-width:100%;border-radius:0;box-shadow:none}
-  .journal-content{padding:20px 15px}
-  .emotion-section,.journal-section,.intensity-container{background:#fff;box-shadow:none;padding:15px;border-radius:0}
-  .section-title{font-size:1.2rem}
-  .journal-header h1{font-size:1.8rem}
-  .journal-header p{font-size:.95rem}
-  .emotion-grid{grid-gap:12px}
+ body{background:#fff;display:block;padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left)}
+ .journal{max-width:100%;border-radius:0;box-shadow:none}
+ .content{padding:20px 15px}
+ .card{background:#fff;box-shadow:none;padding:15px;border-radius:0}
+ .section-title{font-size:1.2rem}
+ .header h1{font-size:1.8rem}
+ .header p{font-size:.95rem}
+ .emotion-grid{gap:12px}
 }
 
-/* ——————————————————— header & disclaimer ——————————————————— */
-.disclaimer-top{background:#27ae60;color:#fff;text-align:center;padding:10px 20px;font-size:.85rem;display:flex;align-items:center;justify-content:center;gap:8px}
-.disclaimer-top i{font-size:1rem}
-.journal-header{background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);color:#fff;text-align:center;padding:25px 20px 30px;position:relative}
-.journal-header h1{font-size:2.3rem;margin-bottom:10px;text-shadow:0 2px 4px rgba(0,0,0,.2)}
-.journal-header p{font-size:1.05rem;max-width:600px;margin:0 auto;opacity:.9}
-.date-display{background:rgba(255,255,255,.2);display:inline-block;padding:6px 18px;border-radius:30px;margin-top:12px;font-weight:600}
+/* — header & disclaimer — */
+.disclaimer{background:#27ae60;color:#fff;padding:10px 20px;font-size:.85rem;display:flex;gap:8px;align-items:center;justify-content:center}
+.header{background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);color:#fff;text-align:center;padding:25px 20px 30px}
+.header h1{font-size:2.3rem;margin-bottom:10px;text-shadow:0 2px 4px rgba(0,0,0,.2)}
+.header p{font-size:1.05rem;max-width:600px;margin:0 auto;opacity:.9}
+.date{background:rgba(255,255,255,.2);display:inline-block;padding:6px 18px;border-radius:30px;margin-top:12px;font-weight:600}
 
-/* ——————————————————— grid layout ——————————————————— */
-.journal-content{padding:30px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
-@media(max-width:768px){.journal-content{grid-template-columns:1fr}}
-.emotion-section,.journal-section{background:#f8f9fc;border-radius:15px;padding:25px;box-shadow:0 5px 15px rgba(0,0,0,.05)}
-.section-title{display:flex;align-items:center;gap:10px;margin-bottom:20px;color:#2c3e50;font-size:1.4rem}
+/* — grid — */
+.content{padding:30px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
+@media(max-width:768px){.content{grid-template-columns:1fr}}
+.card{background:#f8f9fc;padding:25px;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.05)}
+.section-title{display:flex;gap:10px;align-items:center;margin-bottom:20px;color:#2c3e50;font-size:1.4rem}
 .section-title i{background:#4A90E2;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff}
 
-/* ——————————————————— emotions ——————————————————— */
-.emotion-grid{display:grid;grid-gap:15px;grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
-.emotion-option{display:flex;align-items:center;padding:12px 15px;border-radius:10px;cursor:pointer;transition:.3s;font-weight:500;border:2px solid #e0e4ed;background:#fff;min-width:0}
-.emotion-option:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,.1)}
-.emotion-option.selected{border-width:3px;transform:scale(1.03)}
-.emotion-option.dominant{transform:scale(1.1);border-width:4px;box-shadow:0 0 0 4px rgba(0,0,0,.08);color:#fff!important}
-.emotion-color{width:24px;height:24px;border-radius:50%;margin-right:12px;border:2px solid rgba(0,0,0,.1)}
+/* — emotions — */
+.emotion-grid{display:grid;gap:15px;grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+.emotion{display:flex;align-items:center;gap:12px;padding:12px 15px;border:2px solid #e0e4ed;border-radius:10px;background:#fff;cursor:pointer;transition:.3s;font-weight:500}
+.emotion:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,.1)}
+.emotion.sel{border-width:3px;transform:scale(1.03)}
+.emotion.dom{transform:scale(1.1);border-width:4px;box-shadow:0 0 0 4px rgba(0,0,0,.08);color:#fff!important}
+.dot{width:24px;height:24px;border-radius:50%;border:2px solid rgba(0,0,0,.1)}
 /* palette */
-.joy{color:#FFC107;border-color:#FFC107}.sadness{color:#2196F3;border-color:#2196F3}
-.anger{color:#F44336;border-color:#F44336}.fear{color:#9C27B0;border-color:#9C27B0}
-.disgust{color:#4CAF50;border-color:#4CAF50}.surprise{color:#FF9800;border-color:#FF9800}
+.joy{color:#FFC107;border-color:#FFC107}.sad{color:#2196F3;border-color:#2196F3}
+.ang{color:#F44336;border-color:#F44336}.fear{color:#9C27B0;border-color:#9C27B0}
+.disg{color:#4CAF50;border-color:#4CAF50}.surp{color:#FF9800;border-color:#FF9800}
 .love{color:#E91E63;border-color:#E91E63}.calm{color:#00BCD4;border-color:#00BCD4}
-.joy-bg{background:#FFC107}.sadness-bg{background:#2196F3}.anger-bg{background:#F44336}
-.fear-bg{background:#9C27B0}.disgust-bg{background:#4CAF50}.surprise-bg{background:#FF9800}
+
+.joy-bg{background:#FFC107}.sad-bg{background:#2196F3}.ang-bg{background:#F44336}
+.fear-bg{background:#9C27B0}.disg-bg{background:#4CAF50}.surp-bg{background:#FF9800}
 .love-bg{background:#E91E63}.calm-bg{background:#00BCD4}
-/* selected tints */
-.emotion-option.selected.joy{background:rgba(255,193,7,.15)}
-.emotion-option.selected.sadness{background:rgba(33,150,243,.15)}
-.emotion-option.selected.anger{background:rgba(244,67,54,.15)}
-.emotion-option.selected.fear{background:rgba(156,39,176,.15)}
-.emotion-option.selected.disgust{background:rgba(76,175,80,.15)}
-.emotion-option.selected.surprise{background:rgba(255,152,0,.15)}
-.emotion-option.selected.love{background:rgba(233,30,99,.15)}
-.emotion-option.selected.calm{background:rgba(0,188,212,.15)}
-/* dominant */
-.emotion-option.dominant.joy{background:#FFC107}.emotion-option.dominant.sadness{background:#2196F3}
-.emotion-option.dominant.anger{background:#F44336}.emotion-option.dominant.fear{background:#9C27B0}
-.emotion-option.dominant.disgust{background:#4CAF50}.emotion-option.dominant.surprise{background:#FF9800}
-.emotion-option.dominant.love{background:#E91E63}.emotion-option.dominant.calm{background:#00BCD4}
 
-/* ——————————————————— intensity ——————————————————— */
-.intensity-container{background:#fff;padding:20px;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.05)}
-.intensity-slider{width:100%;height:12px;-webkit-appearance:none;background:linear-gradient(to right,#00BCD4,#FFC107,#F44336);border-radius:10px;outline:none;margin:25px 0 15px}
-.intensity-slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #4A90E2;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.3)}
-.intensity-labels{display:flex;justify-content:space-between;color:#7f8c8d;font-size:.9rem}
-.intensity-value{text-align:center;font-weight:bold;margin-top:5px;font-size:1rem;color:#2c3e50}
-.intensity-visual{display:flex;justify-content:space-between;margin-top:10px}
-.intensity-dot{width:10px;height:10px;border-radius:50%;background:#ddd}.intensity-dot.active{background:#4A90E2}
+/* — intensity — */
+.slider-box{background:#fff;padding:20px;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.05)}
+input[type=range]{width:100%;height:12px;-webkit-appearance:none;background:linear-gradient(to right,#00BCD4,#FFC107,#F44336);border-radius:10px;margin:25px 0 15px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #4A90E2;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.3)}
+.labels{display:flex;justify-content:space-between;color:#7f8c8d;font-size:.9rem}
+.val{text-align:center;font-weight:bold;margin-top:5px;font-size:1rem;color:#2c3e50}
+.scale{display:flex;justify-content:space-between;margin-top:10px}
+.scale .s-dot{width:10px;height:10px;border-radius:50%;background:#ddd}
+.scale .active{background:#4A90E2}
 
-/* ——————————————————— prompts & footer ——————————————————— */
-.writing-prompt{margin-bottom:15px;font-weight:600;color:#2c3e50;display:flex;align-items:center;gap:10px}
-.writing-prompt i{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem}
-.write-box{width:100%;min-height:120px;padding:15px;border:2px solid #e0e4ed;border-radius:12px;font-size:1rem;resize:vertical;margin-bottom:20px;transition:border-color .3s;white-space:pre-wrap;overflow:auto}
-.write-box:focus{outline:none;border-color:#4A90E2}
-.journal-footer{text-align:center;padding:20px;background:#f8f9fc;border-top:1px solid #e0e4ed;display:flex;flex-direction:column;align-items:center}
-.print-btn{background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);color:#fff;border:none;padding:14px 35px;font-size:1.05rem;font-weight:600;border-radius:50px;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:0 5px 20px rgba(58,123,213,.4);transition:.3s}
-.print-btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(58,123,213,.5)}
-.print-btn:active{transform:translateY(1px)}
-.bookmark-tip{margin-top:15px;padding:12px 20px;background:linear-gradient(135deg,#FFC107 0%,#FF9800 100%);color:#fff;border-radius:50px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 3px 10px rgba(255,152,0,.3);animation:pulse 2s infinite}
-@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}
+/* — prompts — */
+.prompt{margin-bottom:15px;font-weight:600;color:#2c3e50;display:flex;gap:10px;align-items:center}
+.prompt i{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem}
+textarea{width:100%;min-height:120px;padding:15px;border:2px solid #e0e4ed;border-radius:12px;font-size:1rem;resize:vertical;margin-bottom:20px;transition:border-color .3s;white-space:pre-wrap}
+textarea:focus{outline:none;border-color:#4A90E2}
 
-/* ——————————————————— overlay (now hidden by default) ——————————————————— */
-.loading-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.9);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:1000;border-radius:20px}
-.loading-overlay.active{display:flex}
-.spinner{width:50px;height:50px;border:5px solid rgba(74,144,226,.2);border-top:5px solid #4A90E2;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-.loading-text{font-size:1.1rem;color:#2c3e50;font-weight:500}
+/* — footer — */
+.footer{text-align:center;padding:20px;background:#f8f9fc;border-top:1px solid #e0e4ed;display:flex;flex-direction:column;align-items:center}
+.btn{background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);color:#fff;border:none;padding:14px 35px;font-size:1.05rem;font-weight:600;border-radius:50px;cursor:pointer;display:inline-flex;gap:10px;box-shadow:0 5px 20px rgba(58,123,213,.4);transition:.3s}
+.btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(58,123,213,.5)}
+.tip{margin-top:15px;padding:12px 20px;background:linear-gradient(135deg,#FFC107 0%,#FF9800 100%);color:#fff;border-radius:50px;font-weight:600;display:flex;gap:10px;box-shadow:0 3px 10px rgba(255,152,0,.3)}
 
-/* ——————————————————— nav arrows ——————————————————— */
-.nav-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.7);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;color:#4A90E2;box-shadow:0 2px 10px rgba(0,0,0,.1);z-index:100;transition:.3s}
-.nav-arrow:hover{background:#fff;transform:translateY(-50%) scale(1.1)}
-.nav-arrow.left{left:10px}.nav-arrow.right{right:10px}.nav-arrow.disabled{opacity:.3;cursor:not-allowed;transform:translateY(-50%)}
+.nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.7);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#4A90E2;box-shadow:0 2px 10px rgba(0,0,0,.1);cursor:pointer;transition:.3s}
+.nav:hover{background:#fff;transform:translateY(-50%) scale(1.1)}
+.nav.left{left:10px}.nav.right{right:10px}.nav.dis{opacity:.3;cursor:not-allowed}
 
-/* ——————————————————— print ——————————————————— */
-@media print{
-  body{background:#fff;padding:0}
-  .journal-container{max-width:100%;border-radius:0;box-shadow:none}
-  .journal-header{padding:12mm 0}
-  .journal-content{padding:8mm;display:block}
-  .emotion-section,.journal-section{background:#fff;border:1px solid #ddd;border-radius:0;box-shadow:none;margin-bottom:8mm}
-  .print-btn,.loading-overlay,.bookmark-tip,.nav-arrow,.disclaimer-top{display:none}
-}
+@media print{body{background:#fff;padding:0}.journal{max-width:100%;border-radius:0;box-shadow:none}.disclaimer,.nav,.btn,.tip{display:none}}
 </style>
 
 <style>
-/* copy-protection */
-body,body *{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important}
-textarea,input,[contenteditable="true"],textarea *,input *,[contenteditable="true"] *{-webkit-user-select:text!important;-moz-user-select:text!important;-ms-user-select:text!important;user-select:text!important}
+/* copy-friction */
+body,body *{-webkit-user-select:none!important;-moz-user-select:none!important;user-select:none!important}
+textarea,input,[contenteditable],textarea *,input *,[contenteditable] *{-webkit-user-select:text!important;-moz-user-select:text!important;user-select:text!important}
 </style>
 </head>
 
 <body>
-<div class="journal-container">
-  <!-- disclaimer -->
-  <div class="disclaimer-top"><i class="fas fa-lock"></i> Disclaimer: This journal stores data only in your browser's local storage for 30&nbsp;days. Your entries remain private on your device.</div>
+<canvas id="anti" width="1" height="1" style="position:fixed;top:0;left:0;z-index:99999;pointer-events:none"></canvas>
 
-  <!-- overlay -->
-  <div class="loading-overlay" id="loading-overlay">
-    <div class="spinner"></div>
-    <div class="loading-text">Generating your PDF journal…</div>
-  </div>
+<div class="journal" id="root">
+  <div class="disclaimer"><i class="fas fa-lock"></i> Disclaimer: Entries are saved only to your browser for 30&nbsp;days.</div>
 
-  <!-- nav -->
-  <div class="nav-arrow left disabled"  id="prev-day"><i class="fas fa-chevron-left"></i></div>
-  <div class="nav-arrow right disabled" id="next-day"><i class="fas fa-chevron-right"></i></div>
+  <div class="nav left dis"  id="prev"><i class="fas fa-chevron-left"></i></div>
+  <div class="nav right dis" id="next"><i class="fas fa-chevron-right"></i></div>
 
-  <!-- header -->
-  <div class="journal-header">
-    <h1>Daily Emotion Journal</h1>
-    <p>Track your feelings and emotional patterns in a single, focused session</p>
-    <div class="date-display" id="current-date"></div>
-  </div>
+  <div class="header"><h1>Daily Emotion Journal</h1><p>Track feelings and patterns in one focused session</p><div class="date" id="dsp"></div></div>
 
-  <!-- main -->
-  <div class="journal-content">
-    <div class="emotion-section">
+  <div class="content">
+    <!-- emotions -->
+    <div class="card">
       <h2 class="section-title"><i class="fas fa-heart"></i> Your Emotions Today</h2>
       <div class="emotion-grid">
-        <div class="emotion-option joy"      data-emotion="joy"><div class="emotion-color joy-bg"></div><div>Joy</div></div>
-        <div class="emotion-option sadness"  data-emotion="sadness"><div class="emotion-color sadness-bg"></div><div>Sadness</div></div>
-        <div class="emotion-option anger"    data-emotion="anger"><div class="emotion-color anger-bg"></div><div>Anger</div></div>
-        <div class="emotion-option fear"     data-emotion="fear"><div class="emotion-color fear-bg"></div><div>Fear</div></div>
-        <div class="emotion-option disgust"  data-emotion="disgust"><div class="emotion-color disgust-bg"></div><div>Disgust</div></div>
-        <div class="emotion-option surprise" data-emotion="surprise"><div class="emotion-color surprise-bg"></div><div>Surprise</div></div>
-        <div class="emotion-option love"     data-emotion="love"><div class="emotion-color love-bg"></div><div>Love</div></div>
-        <div class="emotion-option calm"     data-emotion="calm"><div class="emotion-color calm-bg"></div><div>Calm</div></div>
+        <div class="emotion joy"  data-k="joy" ><div class="dot joy-bg"></div><div>Joy</div></div>
+        <div class="emotion sad"  data-k="sad" ><div class="dot sad-bg"></div><div>Sadness</div></div>
+        <div class="emotion ang"  data-k="ang" ><div class="dot ang-bg"></div><div>Anger</div></div>
+        <div class="emotion fear" data-k="fear"><div class="dot fear-bg"></div><div>Fear</div></div>
+        <div class="emotion disg" data-k="disg"><div class="dot disg-bg"></div><div>Disgust</div></div>
+        <div class="emotion surp" data-k="surp"><div class="dot surp-bg"></div><div>Surprise</div></div>
+        <div class="emotion love" data-k="love"><div class="dot love-bg"></div><div>Love</div></div>
+        <div class="emotion calm" data-k="calm"><div class="dot calm-bg"></div><div>Calm</div></div>
       </div>
 
-      <div class="intensity-container">
+      <div class="slider-box">
         <h2 class="section-title"><i class="fas fa-sliders-h"></i> Emotional Intensity</h2>
-        <input type="range" min="1" max="10" value="5" class="intensity-slider" id="intensity-slider">
-        <div class="intensity-labels"><span>Low</span><span>Medium</span><span>High</span></div>
-        <div class="intensity-value" id="intensity-value"></div>
-        <div class="intensity-visual" id="intensity-visual">
-          <div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div>
-          <div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div>
+        <input type="range" id="rng" min="1" max="10" value="5">
+        <div class="labels"><span>Low</span><span>Medium</span><span>High</span></div>
+        <div class="val" id="rngv"></div>
+        <div class="scale" id="sc">
+          <span class="s-dot"></span><span class="s-dot"></span><span class="s-dot"></span><span class="s-dot"></span><span class="s-dot"></span>
+          <span class="s-dot"></span><span class="s-dot"></span><span class="s-dot"></span><span class="s-dot"></span><span class="s-dot"></span>
         </div>
       </div>
     </div>
 
-    <div class="journal-section">
+    <!-- prompts -->
+    <div class="card">
       <h2 class="section-title"><i class="fas fa-pencil-alt"></i> Journal Prompts</h2>
-      <div class="writing-prompt"><i class="fas fa-bolt" style="background:#F44336"></i> Trigger (What happened today?)</div>
-      <textarea class="write-box" id="trigger-box"></textarea>
 
-      <div class="writing-prompt"><i class="fas fa-brain" style="background:#9C27B0"></i> Response (Thoughts/Actions/Body)</div>
-      <textarea class="write-box" id="response-box"></textarea>
+      <div class="prompt"><i class="fas fa-bolt" style="background:#F44336"></i> Trigger (What happened today?)</div>
+      <textarea id="t_trigger"></textarea>
 
-      <div class="writing-prompt"><i class="fas fa-lightbulb" style="background:#FFC107"></i> Learning / Insight</div>
-      <textarea class="write-box" id="learning-box"></textarea>
+      <div class="prompt"><i class="fas fa-brain" style="background:#9C27B0"></i> Response (Thoughts / Actions / Body)</div>
+      <textarea id="t_response"></textarea>
 
-      <div class="writing-prompt"><i class="fas fa-gratipay" style="background:#E91E63"></i> Gratitude</div>
-      <textarea class="write-box" id="gratitude-box"></textarea>
+      <div class="prompt"><i class="fas fa-lightbulb" style="background:#FFC107"></i> Learning / Insight</div>
+      <textarea id="t_learning"></textarea>
 
-      <div class="writing-prompt"><i class="fas fa-forward" style="background:#00BCD4"></i> Action for Tomorrow</div>
-      <textarea class="write-box" id="action-box"></textarea>
+      <div class="prompt"><i class="fas fa-gratipay" style="background:#E91E63"></i> Gratitude</div>
+      <textarea id="t_grat"></textarea>
+
+      <div class="prompt"><i class="fas fa-forward" style="background:#00BCD4"></i> Action for Tomorrow</div>
+      <textarea id="t_action"></textarea>
     </div>
   </div>
 
-  <!-- footer -->
-  <div class="journal-footer">
-    <button class="print-btn" id="pdf-button"><i class="fas fa-file-pdf"></i> Download PDF Journal</button>
-    <div class="bookmark-tip"><i class="fas fa-bookmark"></i> Tip: Bookmark this page to use it daily!</div>
-  </div>
+  <div class="footer"><button class="btn" id="dl"><i class="fas fa-file-pdf"></i> Download PDF Journal</button><div class="tip"><i class="fas fa-bookmark"></i> Tip: bookmark this page!</div></div>
 </div>
 
 <script>
-window.addEventListener('load',()=>{
-  const{jsPDF}=window.jspdf;
+/* ——————————————————— state helpers ——————————————————— */
+const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+let cur=new Date(),key=fmt(cur);
+let store=JSON.parse(localStorage.getItem('ej')||'{}');
 
-  /* date & helpers */
-  const cd=document.getElementById('current-date');
-  cd.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+/* ——————————————————— dom refs ——————————————————— */
+const E=q=>document.querySelector(q);
+const dsp=E('#dsp');
+const emo=[...document.querySelectorAll('.emotion')];
+const rng=E('#rng'),rngv=E('#rngv'),dots=[...E('#sc').children];
+const fields={trigger:E('#t_trigger'),response:E('#t_response'),learning:E('#t_learning'),grat:E('#t_grat'),action:E('#t_action')};
+const prev=E('#prev'),next=E('#next'),dl=E('#dl'),root=E('#root');
 
-  /* state */
-  let current=new Date(),key=fmt(current);
-  let data=JSON.parse(localStorage.getItem('emotionJournalEntries')||'{}');
+/* ——————————————————— ui init ——————————————————— */
+dsp.textContent=cur.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+load();
+updateNav();
+updateScale();
 
-  /* refs */
-  const opts=[...document.querySelectorAll('.emotion-option')],
-        slider=document.getElementById('intensity-slider'),
-        iVal=document.getElementById('intensity-value'),
-        dots=[...document.querySelectorAll('.intensity-dot')],
-        boxes={trigger:document.getElementById('trigger-box'),response:document.getElementById('response-box'),learning:document.getElementById('learning-box'),gratitude:document.getElementById('gratitude-box'),action:document.getElementById('action-box')},
-        prev=document.getElementById('prev-day'),next=document.getElementById('next-day'),
-        overlay=document.getElementById('loading-overlay');
+/* ——————————————————— load/save ——————————————————— */
+function load(){
+  emo.forEach(e=>e.classList.remove('sel','dom'));
+  Object.values(fields).forEach(f=>f.value='');rng.value=5;
+  const d=store[key]||{};
+  d.em?.forEach(k=>E(`.emotion[data-k="${k}"]`)?.classList.add('sel'));
+  d.em?.slice(-1).forEach(k=>E(`.emotion[data-k="${k}"]`)?.classList.add('dom'));
+  rng.value=d.in||5;
+  Object.keys(fields).forEach(k=>d[k]&&(fields[k].value=d[k]));
+  updateScale();
+}
+function save(){
+  store[key]={
+    em:emo.filter(e=>e.classList.contains('sel')).map(e=>e.dataset.k),
+    in:rng.value,
+    trigger:fields.trigger.value,response:fields.response.value,
+    learning:fields.learning.value,grat:fields.grat.value,action:fields.action.value};
+  localStorage.setItem('ej',JSON.stringify(store));
+  updateNav();
+}
 
-  /* load entry */
-  function loadEntry(k){
-    opts.forEach(o=>o.classList.remove('selected','dominant'));
-    Object.values(boxes).forEach(b=>b.value='');slider.value=5;
-    const e=data[k]||{};
-    e.emotions?.forEach(em=>document.querySelector(`.emotion-option[data-emotion="${em}"]`)?.classList.add('selected'));
-    e.emotions?.slice(-1)?.forEach(em=>document.querySelector(`.emotion-option[data-emotion="${em}"]`)?.classList.add('dominant'));
-    slider.value=e.intensity||5;
-    Object.keys(boxes).forEach(id=>{if(e[id])boxes[id].value=e[id]});
-    updateIntensity();
-  }
+/* ——————————————————— events ——————————————————— */
+emo.forEach(e=>e.addEventListener('click',()=>{
+  e.classList.toggle('sel');emo.forEach(o=>o.classList.remove('dom'));
+  if(e.classList.contains('sel'))e.classList.add('dom');
+  save();
+}));
+rng.oninput=()=>{updateScale();save()};
+Object.values(fields).forEach(f=>f.addEventListener('input',save));
+prev.onclick=()=>{const p=new Date(cur);p.setDate(p.getDate()-1);if(store[fmt(p)]){save();cur=p;key=fmt(cur);dsp.textContent=cur.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});load()}};
+next.onclick=()=>{const n=new Date(cur);n.setDate(n.getDate()+1);if(n<=new Date()){save();cur=n;key=fmt(cur);dsp.textContent=cur.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});load()}};
+dl.onclick=generate;
 
-  /* save entry */
-  function saveEntry(){
-    data[key]={date:key,
-      emotions:opts.filter(o=>o.classList.contains('selected')).map(o=>o.dataset.emotion),
-      intensity:slider.value,
-      trigger:boxes.trigger.value,response:boxes.response.value,
-      learning:boxes.learning.value,gratitude:boxes.gratitude.value,action:boxes.action.value};
-    localStorage.setItem('emotionJournalEntries',JSON.stringify(data));
-    updateNav();
-  }
+/* ——————————————————— helpers ——————————————————— */
+function updateScale(){
+  rngv.textContent=`${rng.value} - ${rng.value<=3?'Low':rng.value<=7?'Medium':'High'}`;
+  dots.forEach((d,i)=>d.classList.toggle('active',i<rng.value));
+}
+function updateNav(){
+  prev.classList.toggle('dis',!store[fmt(new Date(cur.getTime()-864e5))]);
+  next.classList.toggle('dis',new Date(cur.getTime()+864e5)>new Date());
+}
 
-  /* intensity visuals */
-  function updateIntensity(){
-    const v=+slider.value;
-    iVal.textContent=`${v} - ${v<=3?'Low':v<=7?'Medium':'High'}`;
-    dots.forEach((d,i)=>d.classList.toggle('active',i<v));
-  }
+/* ——————————————————— overlay (on-demand) ——————————————————— */
+function overlay(show){
+  let ov=E('#ovbox');
+  if(show){
+    if(!ov){
+      ov=document.createElement('div');ov.id='ovbox';
+      ov.style.cssText='position:fixed;inset:0;background:rgba(255,255,255,.9);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;font:600 1.2rem Segoe UI';
+      ov.innerHTML='<div class="spinner" style="width:50px;height:50px;border:5px solid rgba(74,144,226,.2);border-top:5px solid #4A90E2;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px"></div>Generating your PDF…';
+      document.body.appendChild(ov);
+    }
+  }else ov&&ov.remove();
+}
 
-  /* prev/next enable */
-  function updateNav(){
-    prev.classList.toggle('disabled',!data[fmt(new Date(current.getTime()-864e5))]);
-    next.classList.toggle('disabled',new Date(current.getTime()+864e5)>new Date());
-  }
+/* ——————————————————— pdf ——————————————————— */
+function generate(){
+  save();overlay(true);
+  const clone=root.cloneNode(true);
+  clone.querySelectorAll('.nav,.footer,.disclaimer').forEach(n=>n.remove());
+  const ct=clone.querySelector('.content');
+  ct.style.display='block';ct.style.gridTemplateColumns='1fr';ct.style.padding='20px';
+  clone.querySelectorAll('.card').forEach(c=>{c.style.background='#fff';c.style.boxShadow='none';c.style.border='none';c.style.padding='15px 0'});
+  clone.querySelectorAll('.emotion,.section-title i').forEach(e=>e.style.boxShadow='none');
+  clone.querySelectorAll('textarea').forEach(t=>{const d=document.createElement('div');d.className=t.className;d.style.minHeight='120px';d.style.whiteSpace='pre-wrap';d.textContent=t.value;t.replaceWith(d)});
+  clone.style.width='800px';clone.style.position='absolute';clone.style.left='-9999px';clone.style.boxShadow='none';clone.style.borderRadius='0';
+  document.body.appendChild(clone);
 
-  /* listeners */
-  opts.forEach(o=>o.addEventListener('click',()=>{o.classList.toggle('selected');opts.forEach(e=>e.classList.remove('dominant'));if(o.classList.contains('selected'))o.classList.add('dominant');saveEntry()}));
-  slider.addEventListener('input',()=>{updateIntensity();saveEntry()});
-  Object.values(boxes).forEach(b=>b.addEventListener('input',saveEntry));
-  prev.addEventListener('click',()=>{const p=new Date(current);p.setDate(p.getDate()-1);if(data[fmt(p)]){saveEntry();current=p;key=fmt(current);cd.textContent=current.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});loadEntry(key)}});
-  next.addEventListener('click',()=>{const n=new Date(current);n.setDate(n.getDate()+1);if(n<=new Date()){saveEntry();current=n;key=fmt(current);cd.textContent=current.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});loadEntry(key)}});
-  document.getElementById('pdf-button').addEventListener('click',generatePDF);
+  html2canvas(clone,{scale:1,backgroundColor:'#fff'}).then(c=>{
+    clone.remove();
+    const pdf=new jspdf.jsPDF('p','mm','a4',true);
+    const w=pdf.internal.pageSize.getWidth(),h=c.height*w/c.width;
+    let pos=0;pdf.addImage(c.toDataURL('image/jpeg',0.85),'JPEG',0,pos,w,h,'','FAST');
+    for(let rem=h-pdf.internal.pageSize.getHeight();rem>5;rem-=pdf.internal.pageSize.getHeight()){
+      pos-=pdf.internal.pageSize.getHeight();pdf.addPage();pdf.addImage(c.toDataURL('image/jpeg',0.85),'JPEG',0,pos,w,h,'','FAST');
+    }
+    pdf.save(`emotion-journal-${key}.pdf`);
+  }).catch(()=>alert('PDF failed')).finally(()=>overlay(false));
+}
 
-  loadEntry(key);updateNav();
-
-  /* PDF with margin */
-  function generatePDF(){
-    saveEntry();overlay.classList.add('active');
-
-    const clone=document.querySelector('.journal-container').cloneNode(true);
-    clone.querySelectorAll('.nav-arrow,.journal-footer,.disclaimer-top,#loading-overlay').forEach(el=>el.remove());
-
-    const jc=clone.querySelector('.journal-content');
-    jc.style.display='block';jc.style.gridTemplateColumns='1fr';jc.style.padding='20px'; /* margin */
-    clone.querySelectorAll('*').forEach(el=>{el.style.boxShadow='none';});
-    clone.querySelectorAll('.write-box').forEach(t=>{const d=document.createElement('div');d.className='write-box';d.style.minHeight='120px';d.style.whiteSpace='pre-wrap';d.textContent=t.value;t.replaceWith(d)});
-    clone.style.width='800px';clone.style.borderRadius='0';clone.style.boxShadow='none';clone.style.position='absolute';clone.style.left='-9999px';
-    document.body.appendChild(clone);
-
-    html2canvas(clone,{scale:1,backgroundColor:'#ffffff',useCORS:true}).then(c=>{
-      document.body.removeChild(clone);
-      const pdf=new jsPDF('p','mm','a4',true);
-      const w=pdf.internal.pageSize.getWidth(),h=c.height*w/c.width;
-      let pos=0;pdf.addImage(c.toDataURL('image/jpeg',0.85),'JPEG',0,pos,w,h,'','FAST');
-      for(let rem=h-pdf.internal.pageSize.getHeight();rem>5;rem-=pdf.internal.pageSize.getHeight()){
-        pos-=pdf.internal.pageSize.getHeight();pdf.addPage();pdf.addImage(c.toDataURL('image/jpeg',0.85),'JPEG',0,pos,w,h,'','FAST');
-      }
-      pdf.save(`emotion-journal-${key}.pdf`);
-    }).catch(()=>alert('PDF failed, try again')).finally(()=>overlay.classList.remove('active'));
-  }
+/* ——————————————————— copy-friction JS ——————————————————— */
+document.addEventListener('contextmenu',e=>!e.target.closest('textarea')&&e.preventDefault());
+document.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase(),c=e.ctrlKey||e.metaKey,s=e.shiftKey;
+  if(k==='f12'||(c&&s&&['i','j','c'].includes(k))||k==='printscreen'||(c&&['u','s','p','a','c'].includes(k)))e.preventDefault();
 });
+/* invisible canvas trap: steals first click selection */
+document.addEventListener('mousedown',()=>{E('#anti').style.pointerEvents='none'},{once:true});
 </script>
 </body>
 </html>
