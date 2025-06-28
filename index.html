@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- NEW: discourage search-engine caching / archiving -->
+  <!-- Discourage search-engine caching / archiving -->
   <meta name="robots" content="noindex, noarchive">
 
   <title>Daily Emotion Journal</title>
@@ -12,535 +12,306 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <!-- ──────────────────────────────────────────────────────────── -->
-  <!-- ORIGINAL STYLES                                             -->
-  <!-- (unchanged from your source)                                -->
+  <!-- MAIN STYLES                                                 -->
   <!-- ──────────────────────────────────────────────────────────── -->
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    }
+    body{
+      background:linear-gradient(135deg,#f5f7fa 0%,#e4e7f1 100%);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+    .journal-container{
+      width:100%;
+      max-width:900px;
+      background:#fff;
+      border-radius:20px;
+      box-shadow:0 15px 50px rgba(0,0,0,.15);
+      overflow:hidden;
+      position:relative;
+    }
+    /* disclaimer now calm green */
+    .disclaimer-top{
+      background:#27ae60;
+      color:#fff;
+      text-align:center;
+      padding:10px 20px;
+      font-size:.9rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .disclaimer-top i{font-size:1.1rem;}
+
+    .journal-header{
+      background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);
+      color:#fff;
+      text-align:center;
+      padding:25px 20px 30px;
+      position:relative;
+    }
+    .journal-header h1{font-size:2.5rem;margin-bottom:10px;text-shadow:0 2px 4px rgba(0,0,0,.2);}
+    .journal-header p{font-size:1.1rem;max-width:600px;margin:0 auto;opacity:.9;}
+    .date-display{
+      background:rgba(255,255,255,.2);
+      display:inline-block;
+      padding:8px 20px;
+      border-radius:30px;
+      margin-top:15px;
+      font-weight:600;
     }
 
-    body {
-      background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
+    .journal-content{
+      padding:30px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:30px;
+    }
+    @media(max-width:768px){
+      .journal-content{grid-template-columns:1fr;}
     }
 
-    .journal-container {
-      width: 100%;
-      max-width: 900px;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
-      overflow: hidden;
-      position: relative;
+    .emotion-section,.journal-section{
+      background:#f8f9fc;
+      border-radius:15px;
+      padding:25px;
+      box-shadow:0 5px 15px rgba(0,0,0,.05);
+    }
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:20px;
+      color:#2c3e50;
+      font-size:1.4rem;
+    }
+    .section-title i{
+      background:#4A90E2;
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
     }
 
-    .disclaimer-top {
-      background: #e74c3c;
-      color: white;
-      text-align: center;
-      padding: 10px 20px;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+    .emotion-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:15px;
+      margin-bottom:25px;
+    }
+    .emotion-option{
+      display:flex;
+      align-items:center;
+      padding:12px 15px;
+      border-radius:10px;
+      cursor:pointer;
+      transition:.3s;
+      font-weight:500;
+      border:2px solid #e0e4ed;
+      background:#fff;
+    }
+    .emotion-option:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,.1);}
+    .emotion-option.selected{border-width:3px;transform:scale(1.03);}
+    /* dominant emotion gets extra pop */
+    .emotion-option.dominant{
+      transform:scale(1.10);
+      border-width:4px;
+      box-shadow:0 0 0 4px rgba(0,0,0,.08);
+      color:#fff!important;
     }
 
-    .disclaimer-top i {
-      font-size: 1.1rem;
+    .emotion-color{
+      width:24px;
+      height:24px;
+      border-radius:50%;
+      margin-right:12px;
+      border:2px solid rgba(0,0,0,.1);
     }
 
-    .journal-header {
-      background: linear-gradient(135deg, #4A90E2 0%, #3a7bd5 100%);
-      color: white;
-      text-align: center;
-      padding: 25px 20px 30px;
-      position: relative;
+    /* emotion palette */
+    .joy{color:#FFC107;border-color:#FFC107;}
+    .sadness{color:#2196F3;border-color:#2196F3;}
+    .anger{color:#F44336;border-color:#F44336;}
+    .fear{color:#9C27B0;border-color:#9C27B0;}
+    .disgust{color:#4CAF50;border-color:#4CAF50;}
+    .surprise{color:#FF9800;border-color:#FF9800;}
+    .love{color:#E91E63;border-color:#E91E63;}
+    .calm{color:#00BCD4;border-color:#00BCD4;}
+
+    .joy-bg{background:#FFC107;}
+    .sadness-bg{background:#2196F3;}
+    .anger-bg{background:#F44336;}
+    .fear-bg{background:#9C27B0;}
+    .disgust-bg{background:#4CAF50;}
+    .surprise-bg{background:#FF9800;}
+    .love-bg{background:#E91E63;}
+    .calm-bg{background:#00BCD4;}
+
+    /* dominant background overrides */
+    .emotion-option.dominant.joy{background:#FFC107;}
+    .emotion-option.dominant.sadness{background:#2196F3;}
+    .emotion-option.dominant.anger{background:#F44336;}
+    .emotion-option.dominant.fear{background:#9C27B0;}
+    .emotion-option.dominant.disgust{background:#4CAF50;}
+    .emotion-option.dominant.surprise{background:#FF9800;}
+    .emotion-option.dominant.love{background:#E91E63;}
+    .emotion-option.dominant.calm{background:#00BCD4;}
+
+    /* selected subtle tints */
+    .emotion-option.selected.joy{background:rgba(255,193,7,.15);}
+    .emotion-option.selected.sadness{background:rgba(33,150,243,.15);}
+    .emotion-option.selected.anger{background:rgba(244,67,54,.15);}
+    .emotion-option.selected.fear{background:rgba(156,39,176,.15);}
+    .emotion-option.selected.disgust{background:rgba(76,175,80,.15);}
+    .emotion-option.selected.surprise{background:rgba(255,152,0,.15);}
+    .emotion-option.selected.love{background:rgba(233,30,99,.15);}
+    .emotion-option.selected.calm{background:rgba(0,188,212,.15);}
+
+    .intensity-container{
+      background:#fff;
+      padding:20px;
+      border-radius:15px;
+      box-shadow:0 5px 15px rgba(0,0,0,.05);
+    }
+    .intensity-slider{
+      width:100%;
+      height:12px;
+      -webkit-appearance:none;
+      background:linear-gradient(to right,#00BCD4,#FFC107,#F44336);
+      border-radius:10px;
+      outline:none;
+      margin:25px 0 15px;
+    }
+    .intensity-slider::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width:28px;height:28px;border-radius:50%;
+      background:#fff;border:3px solid #4A90E2;
+      cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.3);
+    }
+    .intensity-labels{display:flex;justify-content:space-between;color:#7f8c8d;font-size:.95rem;}
+    .intensity-value{text-align:center;font-weight:bold;margin-top:5px;font-size:1.1rem;color:#2c3e50;}
+
+    .writing-prompt{
+      margin-bottom:15px;
+      font-weight:600;
+      color:#2c3e50;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .writing-prompt i{
+      width:30px;height:30px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;
+    }
+    .write-box{
+      width:100%;min-height:120px;padding:15px;
+      border:2px solid #e0e4ed;border-radius:12px;font-size:1rem;
+      resize:vertical;margin-bottom:20px;transition:border-color .3s;
+      white-space:pre-wrap;word-wrap:break-word;overflow:auto;
+    }
+    .write-box:focus{outline:none;border-color:#4A90E2;}
+
+    .journal-footer{
+      text-align:center;padding:20px;background:#f8f9fc;
+      border-top:1px solid #e0e4ed;display:flex;flex-direction:column;align-items:center;
+    }
+    .print-btn{
+      background:linear-gradient(135deg,#4A90E2 0%,#3a7bd5 100%);
+      color:#fff;border:none;padding:14px 35px;font-size:1.1rem;font-weight:600;
+      border-radius:50px;cursor:pointer;display:inline-flex;align-items:center;gap:10px;
+      box-shadow:0 5px 20px rgba(58,123,213,.4);transition:.3s;
+    }
+    .print-btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(58,123,213,.5);}
+    .print-btn:active{transform:translateY(1px);}
+    .bookmark-tip{
+      margin-top:15px;padding:12px 20px;background:linear-gradient(135deg,#FFC107 0%,#FF9800 100%);
+      color:#fff;border-radius:50px;font-weight:600;display:flex;align-items:center;gap:10px;
+      box-shadow:0 3px 10px rgba(255,152,0,.3);animation:pulse 2s infinite;
+    }
+    @keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
+
+    /* loading overlay */
+    .loading-overlay{
+      position:absolute;top:0;left:0;width:100%;height:100%;
+      background:rgba(255,255,255,.9);display:flex;justify-content:center;align-items:center;
+      flex-direction:column;z-index:1000;border-radius:20px;opacity:0;pointer-events:none;transition:.3s;
+    }
+    .loading-overlay.active{opacity:1;pointer-events:all;}
+    .spinner{
+      width:50px;height:50px;border:5px solid rgba(74,144,226,.2);
+      border-top:5px solid #4A90E2;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px;
+    }
+    @keyframes spin{0%{transform:rotate(0);}100%{transform:rotate(360deg);}}
+    .loading-text{font-size:1.2rem;color:#2c3e50;font-weight:500;}
+
+    /* navigation arrows */
+    .nav-arrow{
+      position:absolute;top:50%;transform:translateY(-50%);
+      background:rgba(255,255,255,.7);width:40px;height:40px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;color:#4A90E2;
+      box-shadow:0 2px 10px rgba(0,0,0,.1);z-index:100;transition:.3s;
+    }
+    .nav-arrow:hover{background:#fff;transform:translateY(-50%) scale(1.1);}
+    .nav-arrow.left{left:10px;}
+    .nav-arrow.right{right:10px;}
+    .nav-arrow.disabled{opacity:.3;cursor:not-allowed;transform:translateY(-50%);}
+
+    /* print tweaks */
+    @media print{
+      body{background:#fff;padding:0;}
+      .journal-container{max-width:100%;box-shadow:none;border-radius:0;}
+      .journal-header{padding:15mm 0;}
+      .journal-content{padding:10mm;display:block;}
+      .emotion-section,.journal-section{box-shadow:none;border:1px solid #ddd;margin-bottom:10mm;break-inside:avoid;}
+      .print-btn,.loading-overlay,.bookmark-tip,.nav-arrow,.disclaimer-top{display:none;}
+      .emotion-color{border:2px solid rgba(0,0,0,.3);}
+      .emotion-option.selected{border-width:3px;}
+      .write-box{border:1px solid #ddd;min-height:auto;height:auto;overflow:visible;display:block;}
+      .intensity-slider{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:linear-gradient(to right,#00BCD4,#FFC107,#F44336)!important;}
+      .intensity-slider::-webkit-slider-thumb{-webkit-appearance:none;background:#fff!important;border:3px solid #2c3e50!important;}
     }
 
-    .journal-header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .journal-header p {
-      font-size: 1.1rem;
-      max-width: 600px;
-      margin: 0 auto;
-      opacity: 0.9;
-    }
-
-    .date-display {
-      background: rgba(255, 255, 255, 0.2);
-      display: inline-block;
-      padding: 8px 20px;
-      border-radius: 30px;
-      margin-top: 15px;
-      font-weight: 600;
-    }
-
-    .journal-content {
-      padding: 30px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-    }
-
-    @media (max-width: 768px) {
-      .journal-content {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .emotion-section {
-      background: #f8f9fc;
-      border-radius: 15px;
-      padding: 25px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      color: #2c3e50;
-      font-size: 1.4rem;
-    }
-
-    .section-title i {
-      background: #4A90E2;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-    }
-
-    .emotion-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-
-    .emotion-option {
-      display: flex;
-      align-items: center;
-      padding: 12px 15px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      border: 2px solid #e0e4ed;
-      background: white;
-    }
-
-    .emotion-option:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .emotion-option.selected {
-      border-width: 3px;
-      transform: scale(1.03);
-    }
-
-    .emotion-color {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      margin-right: 12px;
-      border: 2px solid rgba(0,0,0,0.1);
-    }
-
-    /* Emotion colors - vibrant for print */
-    .joy { color: #FFC107; border-color: #FFC107; }
-    .sadness { color: #2196F3; border-color: #2196F3; }
-    .anger { color: #F44336; border-color: #F44336; }
-    .fear { color: #9C27B0; border-color: #9C27B0; }
-    .disgust { color: #4CAF50; border-color: #4CAF50; }
-    .surprise { color: #FF9800; border-color: #FF9800; }
-    .love { color: #E91E63; border-color: #E91E63; }
-    .calm { color: #00BCD4; border-color: #00BCD4; }
-
-    .joy-bg { background: #FFC107; }
-    .sadness-bg { background: #2196F3; }
-    .anger-bg { background: #F44336; }
-    .fear-bg { background: #9C27B0; }
-    .disgust-bg { background: #4CAF50; }
-    .surprise-bg { background: #FF9800; }
-    .love-bg { background: #E91E63; }
-    .calm-bg { background: #00BCD4; }
-
-    /* Selected state with background color */
-    .emotion-option.selected.joy { background-color: rgba(255, 193, 7, 0.15); }
-    .emotion-option.selected.sadness { background-color: rgba(33, 150, 243, 0.15); }
-    .emotion-option.selected.anger { background-color: rgba(244, 67, 54, 0.15); }
-    .emotion-option.selected.fear { background-color: rgba(156, 39, 176, 0.15); }
-    .emotion-option.selected.disgust { background-color: rgba(76, 175, 80, 0.15); }
-    .emotion-option.selected.surprise { background-color: rgba(255, 152, 0, 0.15); }
-    .emotion-option.selected.love { background-color: rgba(233, 30, 99, 0.15); }
-    .emotion-option.selected.calm { background-color: rgba(0, 188, 212, 0.15); }
-
-    .intensity-container {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    .intensity-slider {
-      width: 100%;
-      height: 12px;
-      -webkit-appearance: none;
-      background: linear-gradient(to right, #00BCD4, #FFC107, #F44336);
-      border-radius: 10px;
-      outline: none;
-      margin: 25px 0 15px;
-    }
-
-    .intensity-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: white;
-      border: 3px solid #4A90E2;
-      cursor: pointer;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-    }
-
-    .intensity-labels {
-      display: flex;
-      justify-content: space-between;
-      color: #7f8c8d;
-      font-size: 0.95rem;
-    }
-
-    .intensity-value {
-      text-align: center;
-      font-weight: bold;
-      margin-top: 5px;
-      font-size: 1.1rem;
-      color: #2c3e50;
-    }
-
-    .journal-section {
-      background: #f8f9fc;
-      border-radius: 15px;
-      padding: 25px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    .writing-prompt {
-      margin-bottom: 15px;
-      font-weight: 600;
-      color: #2c3e50;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .writing-prompt i {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 0.9rem;
-    }
-
-    .write-box {
-      width: 100%;
-      min-height: 120px;
-      padding: 15px;
-      border: 2px solid #e0e4ed;
-      border-radius: 12px;
-      font-size: 1rem;
-      resize: vertical;
-      margin-bottom: 20px;
-      transition: border-color 0.3s;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      overflow: auto;
-    }
-
-    .write-box:focus {
-      outline: none;
-      border-color: #4A90E2;
-    }
-
-    .journal-footer {
-      text-align: center;
-      padding: 20px;
-      background: #f8f9fc;
-      border-top: 1px solid #e0e4ed;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .print-btn {
-      background: linear-gradient(135deg, #4A90E2 0%, #3a7bd5 100%);
-      color: white;
-      border: none;
-      padding: 14px 35px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      border-radius: 50px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 5px 20px rgba(58, 123, 213, 0.4);
-      transition: all 0.3s ease;
-    }
-
-    .print-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(58, 123, 213, 0.5);
-    }
-
-    .print-btn:active {
-      transform: translateY(1px);
-    }
-
-    .bookmark-tip {
-      margin-top: 15px;
-      padding: 12px 20px;
-      background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
-      color: white;
-      border-radius: 50px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.03); }
-      100% { transform: scale(1); }
-    }
-
-    /* Loading overlay for PDF generation */
-    .loading-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      z-index: 1000;
-      border-radius: 20px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .loading-overlay.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid rgba(74, 144, 226, 0.2);
-      border-top: 5px solid #4A90E2;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-      font-size: 1.2rem;
-      color: #2c3e50;
-      font-weight: 500;
-    }
-
-    /* Navigation arrows */
-    .nav-arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.7);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 1.2rem;
-      color: #4A90E2;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      z-index: 100;
-      transition: all 0.3s ease;
-    }
-
-    .nav-arrow:hover {
-      background: white;
-      transform: translateY(-50%) scale(1.1);
-    }
-
-    .nav-arrow.left {
-      left: 10px;
-    }
-
-    .nav-arrow.right {
-      right: 10px;
-    }
-
-    .nav-arrow.disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-      transform: translateY(-50%) scale(1);
-    }
-
-    /* Print-specific styles */
-    @media print {
-      body {
-        background: white;
-        padding: 0;
-      }
-
-      .journal-container {
-        max-width: 100%;
-        box-shadow: none;
-        border-radius: 0;
-      }
-
-      .journal-header {
-        padding: 15mm 0;
-      }
-
-      .journal-content {
-        padding: 10mm;
-        display: block;
-      }
-
-      .emotion-section, .journal-section {
-        box-shadow: none;
-        border: 1px solid #ddd;
-        margin-bottom: 10mm;
-        break-inside: avoid;
-      }
-
-      .print-btn, .loading-overlay, .bookmark-tip, .nav-arrow, .disclaimer-top {
-        display: none;
-      }
-
-      .emotion-color {
-        border: 2px solid rgba(0,0,0,0.3);
-      }
-
-      .emotion-option.selected {
-        border-width: 3px;
-      }
-
-      .write-box {
-        border: 1px solid #ddd;
-        min-height: auto;
-        height: auto;
-        overflow: visible;
-        display: block;
-      }
-
-      /* Improve print visibility for intensity */
-      .intensity-slider {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        background: linear-gradient(to right, #00BCD4, #FFC107, #F44336) !important;
-      }
-
-      .intensity-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        background: white !important;
-        border: 3px solid #2c3e50 !important;
-      }
-    }
-
-    /* Emotion intensity visualization */
-    .intensity-visual {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-    }
-
-    .intensity-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #ddd;
-    }
-
-    .intensity-dot.active {
-      background: #4A90E2;
-    }
+    .intensity-visual{display:flex;justify-content:space-between;margin-top:10px;}
+    .intensity-dot{width:10px;height:10px;border-radius:50%;background:#ddd;}
+    .intensity-dot.active{background:#4A90E2;}
   </style>
 
   <!-- ──────────────────────────────────────────────────────────── -->
-  <!-- NEW: copy-protection CSS (additive, after originals)        -->
+  <!-- COPY-PROTECTION CSS                                         -->
   <!-- ──────────────────────────────────────────────────────────── -->
   <style id="copy-protect-css">
-    /* Lock text selection everywhere … */
-    body, body * {
-      -webkit-user-select: none !important;
-         -moz-user-select: none !important;
-          -ms-user-select: none !important;
-              user-select: none !important;
-    }
-    /* …except where users must type/select */
-    textarea, input, [contenteditable="true"],
-    textarea *, input *, [contenteditable="true"] * {
-      -webkit-user-select: text !important;
-         -moz-user-select: text !important;
-          -ms-user-select: text !important;
-              user-select: text !important;
-    }
+    body,body *{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important;}
+    textarea,input,[contenteditable="true"],textarea *,input *,[contenteditable="true"] *{-webkit-user-select:text!important;-moz-user-select:text!important;-ms-user-select:text!important;user-select:text!important;}
   </style>
 </head>
 
 <body>
   <div class="journal-container">
-    <!-- Top disclaimer -->
+    <!-- disclaimer -->
     <div class="disclaimer-top">
       <i class="fas fa-lock"></i>
-      Disclaimer: This journal stores data only in your browser's local storage for 30 days. Your entries remain private on your device.
+      Disclaimer: This journal stores data only in your browser's local storage for 30&nbsp;days. Your entries remain private on your device.
     </div>
 
+    <!-- loading overlay -->
     <div class="loading-overlay" id="loading-overlay">
       <div class="spinner"></div>
-      <div class="loading-text">Generating your PDF journal...</div>
+      <div class="loading-text">Generating your PDF journal…</div>
     </div>
 
-    <!-- Navigation arrows -->
+    <!-- nav arrows -->
     <div class="nav-arrow left disabled" id="prev-day">
       <i class="fas fa-chevron-left"></i>
     </div>
@@ -548,528 +319,278 @@
       <i class="fas fa-chevron-right"></i>
     </div>
 
-    <!-- Journal header -->
+    <!-- header -->
     <div class="journal-header">
       <h1>Daily Emotion Journal</h1>
       <p>Track your feelings and emotional patterns in a single, focused session</p>
-      <div class="date-display" id="current-date">Thursday, June&nbsp;28,&nbsp;2025</div>
+      <div class="date-display" id="current-date">Thursday,&nbsp;June&nbsp;28,&nbsp;2025</div>
     </div>
 
-    <!-- Journal main content -->
+    <!-- main content -->
     <div class="journal-content">
-      <!-- Emotion section -->
+      <!-- emotions -->
       <div class="emotion-section">
-        <h2 class="section-title">
-          <i class="fas fa-heart"></i> Your Emotions Today
-        </h2>
-
+        <h2 class="section-title"><i class="fas fa-heart"></i> Your Emotions Today</h2>
         <div class="emotion-grid">
-          <div class="emotion-option joy" data-emotion="joy">
-            <div class="emotion-color joy-bg"></div>
-            <div>Joy</div>
-          </div>
-
-          <div class="emotion-option sadness" data-emotion="sadness">
-            <div class="emotion-color sadness-bg"></div>
-            <div>Sadness</div>
-          </div>
-
-          <div class="emotion-option anger" data-emotion="anger">
-            <div class="emotion-color anger-bg"></div>
-            <div>Anger</div>
-          </div>
-
-          <div class="emotion-option fear" data-emotion="fear">
-            <div class="emotion-color fear-bg"></div>
-            <div>Fear</div>
-          </div>
-
-          <div class="emotion-option disgust" data-emotion="disgust">
-            <div class="emotion-color disgust-bg"></div>
-            <div>Disgust</div>
-          </div>
-
-          <div class="emotion-option surprise" data-emotion="surprise">
-            <div class="emotion-color surprise-bg"></div>
-            <div>Surprise</div>
-          </div>
-
-          <div class="emotion-option love" data-emotion="love">
-            <div class="emotion-color love-bg"></div>
-            <div>Love</div>
-          </div>
-
-          <div class="emotion-option calm" data-emotion="calm">
-            <div class="emotion-color calm-bg"></div>
-            <div>Calm</div>
-          </div>
+          <div class="emotion-option joy" data-emotion="joy"><div class="emotion-color joy-bg"></div><div>Joy</div></div>
+          <div class="emotion-option sadness" data-emotion="sadness"><div class="emotion-color sadness-bg"></div><div>Sadness</div></div>
+          <div class="emotion-option anger" data-emotion="anger"><div class="emotion-color anger-bg"></div><div>Anger</div></div>
+          <div class="emotion-option fear" data-emotion="fear"><div class="emotion-color fear-bg"></div><div>Fear</div></div>
+          <div class="emotion-option disgust" data-emotion="disgust"><div class="emotion-color disgust-bg"></div><div>Disgust</div></div>
+          <div class="emotion-option surprise" data-emotion="surprise"><div class="emotion-color surprise-bg"></div><div>Surprise</div></div>
+          <div class="emotion-option love" data-emotion="love"><div class="emotion-color love-bg"></div><div>Love</div></div>
+          <div class="emotion-option calm" data-emotion="calm"><div class="emotion-color calm-bg"></div><div>Calm</div></div>
         </div>
 
         <div class="intensity-container">
-          <h2 class="section-title">
-            <i class="fas fa-sliders-h"></i> Emotional Intensity
-          </h2>
+          <h2 class="section-title"><i class="fas fa-sliders-h"></i> Emotional Intensity</h2>
           <input type="range" min="1" max="10" value="5" class="intensity-slider" id="intensity-slider">
-          <div class="intensity-labels">
-            <span>Low</span>
-            <span>Medium</span>
-            <span>High</span>
-          </div>
-          <div class="intensity-value" id="intensity-value">5 - Medium</div>
-
-          <!-- Visual indicator for print -->
+          <div class="intensity-labels"><span>Low</span><span>Medium</span><span>High</span></div>
+          <div class="intensity-value" id="intensity-value">5&nbsp;-&nbsp;Medium</div>
           <div class="intensity-visual" id="intensity-visual">
-            <div class="intensity-dot"></div>
-            <div class="intensity-dot"></div>
-            <div class="intensity-dot"></div>
-            <div class="intensity-dot"></div>
-            <div class="intensity-dot"></div>
-            <div class="intensity-dot"></div>
-            <div class="intensity-dot"></div>
-            <div class="intensity-dot"></div>
-            <div class="intensity-dot"></div>
-            <div class="intensity-dot"></div>
+            <div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div>
+            <div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div><div class="intensity-dot"></div>
           </div>
         </div>
       </div>
 
-      <!-- Journal prompts section -->
+      <!-- journal prompts -->
       <div class="journal-section">
-        <h2 class="section-title">
-          <i class="fas fa-pencil-alt"></i> Journal Prompts
-        </h2>
-
-        <div class="writing-prompt">
-          <i class="fas fa-bolt" style="background: #F44336;"></i>
-          Trigger (What happened today?)
-        </div>
+        <h2 class="section-title"><i class="fas fa-pencil-alt"></i> Journal Prompts</h2>
+        <div class="writing-prompt"><i class="fas fa-bolt" style="background:#F44336;"></i> Trigger&nbsp;(What happened today?)</div>
         <textarea class="write-box" id="trigger-box" placeholder="Describe the event or situation that triggered your emotions..."></textarea>
 
-        <div class="writing-prompt">
-          <i class="fas fa-brain" style="background: #9C27B0;"></i>
-          Response (Thoughts/Actions/Body)
-        </div>
+        <div class="writing-prompt"><i class="fas fa-brain" style="background:#9C27B0;"></i> Response&nbsp;(Thoughts/Actions/Body)</div>
         <textarea class="write-box" id="response-box" placeholder="How did you respond? What thoughts came up? Any physical sensations?..."></textarea>
 
-        <div class="writing-prompt">
-          <i class="fas fa-lightbulb" style="background: #FFC107;"></i>
-          Learning / Insight
-        </div>
+        <div class="writing-prompt"><i class="fas fa-lightbulb" style="background:#FFC107;"></i> Learning&nbsp;/&nbsp;Insight</div>
         <textarea class="write-box" id="learning-box" placeholder="What did you learn about yourself or the situation?..."></textarea>
 
-        <div class="writing-prompt">
-          <i class="fas fa-gratipay" style="background: #E91E63;"></i>
-          Gratitude
-        </div>
+        <div class="writing-prompt"><i class="fas fa-gratipay" style="background:#E91E63;"></i> Gratitude</div>
         <textarea class="write-box" id="gratitude-box" placeholder="What are you grateful for today?..."></textarea>
 
-        <div class="writing-prompt">
-          <i class="fas fa-forward" style="background: #00BCD4;"></i>
-          Action for Tomorrow
-        </div>
+        <div class="writing-prompt"><i class="fas fa-forward" style="background:#00BCD4;"></i> Action for Tomorrow</div>
         <textarea class="write-box" id="action-box" placeholder="What small step will you take tomorrow?..."></textarea>
       </div>
     </div>
 
-    <!-- Footer -->
+    <!-- footer -->
     <div class="journal-footer">
-      <button class="print-btn" id="pdf-button">
-        <i class="fas fa-file-pdf"></i> Download PDF Journal
-      </button>
-      <div class="bookmark-tip">
-        <i class="fas fa-bookmark"></i>
-        Tip: Bookmark this page to use it daily!
-      </div>
+      <button class="print-btn" id="pdf-button"><i class="fas fa-file-pdf"></i> Download PDF Journal</button>
+      <div class="bookmark-tip"><i class="fas fa-bookmark"></i> Tip: Bookmark this page to use it daily!</div>
     </div>
   </div>
 
   <!-- ──────────────────────────────────────────────────────────── -->
-  <!-- ORIGINAL MAIN SCRIPT                                        -->
-  <!-- (unchanged from your source)                                -->
+  <!-- MAIN JS                                                     -->
   <!-- ──────────────────────────────────────────────────────────── -->
   <script>
-    // Wait for the jsPDF library to load
-    window.addEventListener('load', function() {
-      const { jsPDF } = window.jspdf;
+  window.addEventListener('load',() =>{
+    const{jsPDF}=window.jspdf;
 
-      // DOM elements
-      const currentDateEl = document.getElementById('current-date');
-      const emotionOptions = document.querySelectorAll('.emotion-option');
-      const intensitySlider = document.getElementById('intensity-slider');
-      const intensityValue = document.getElementById('intensity-value');
-      const intensityVisual = document.getElementById('intensity-visual');
-      const triggerBox = document.getElementById('trigger-box');
-      const responseBox = document.getElementById('response-box');
-      const learningBox = document.getElementById('learning-box');
-      const gratitudeBox = document.getElementById('gratitude-box');
-      const actionBox = document.getElementById('action-box');
-      const pdfButton = document.getElementById('pdf-button');
-      const loadingOverlay = document.getElementById('loading-overlay');
-      const prevDayBtn = document.getElementById('prev-day');
-      const nextDayBtn = document.getElementById('next-day');
+    /* dom */
+    const currentDateEl=document.getElementById('current-date');
+    const emotionOptions=document.querySelectorAll('.emotion-option');
+    const intensitySlider=document.getElementById('intensity-slider');
+    const intensityValue=document.getElementById('intensity-value');
+    const intensityVisual=document.getElementById('intensity-visual');
+    const triggerBox=document.getElementById('trigger-box');
+    const responseBox=document.getElementById('response-box');
+    const learningBox=document.getElementById('learning-box');
+    const gratitudeBox=document.getElementById('gratitude-box');
+    const actionBox=document.getElementById('action-box');
+    const pdfButton=document.getElementById('pdf-button');
+    const loadingOverlay=document.getElementById('loading-overlay');
+    const prevDayBtn=document.getElementById('prev-day');
+    const nextDayBtn=document.getElementById('next-day');
 
-      // Current date and tracking variables
-      let currentDate = new Date();
-      let currentDateKey = formatDateKey(currentDate);
-      let entries = {};
+    /* state */
+    let currentDate=new Date();
+    let currentDateKey=formatDateKey(currentDate);
+    let entries={};
 
-      // Initialize the journal
-      initJournal();
+    initJournal();
 
-      // Initialize the journal with today's date and load any saved data
-      function initJournal() {
-        // Load all entries from local storage
-        const savedEntries = localStorage.getItem('emotionJournalEntries');
-        if (savedEntries) {
-          entries = JSON.parse(savedEntries);
-        }
+    function initJournal(){
+      const saved=localStorage.getItem('emotionJournalEntries');
+      if(saved)entries=JSON.parse(saved);
+      updateDateDisplay();
+      loadEntry(currentDateKey);
+      setupEventListeners();
+      updateNavButtons();
+      updateIntensityDisplay();
+    }
 
-        // Set current date display
-        updateDateDisplay();
+    function formatDateKey(d){
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function updateDateDisplay(){
+      currentDateEl.textContent=currentDate.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+      currentDateKey=formatDateKey(currentDate);
+      document.title=`Daily Emotion Journal - ${currentDateEl.textContent}`;
+    }
 
-        // Load today's entry or initialize a new one
-        loadEntry(currentDateKey);
-
-        // Set up event listeners
-        setupEventListeners();
-
-        // Update navigation buttons
-        updateNavButtons();
-
-        // Update intensity display
-        updateIntensityDisplay();
-      }
-
-      // Format date as YYYY-MM-DD for use as a key
-      function formatDateKey(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      }
-
-      // Update the displayed date
-      function updateDateDisplay() {
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        currentDateEl.textContent = currentDate.toLocaleDateString('en-US', options);
-        currentDateKey = formatDateKey(currentDate);
-        document.title = `Daily Emotion Journal - ${currentDateEl.textContent}`;
-      }
-
-      // Set up all event listeners
-      function setupEventListeners() {
-        // Emotion selection
-        emotionOptions.forEach(option => {
-          option.addEventListener('click', function() {
-            this.classList.toggle('selected');
-            saveCurrentEntry();
-          });
-        });
-
-        // Intensity slider
-        intensitySlider.addEventListener('input', function() {
-          updateIntensityDisplay();
+    function setupEventListeners(){
+      emotionOptions.forEach(opt=>{
+        opt.addEventListener('click',function(){
+          this.classList.toggle('selected');
+          /* dominant highlight */
+          document.querySelectorAll('.emotion-option').forEach(el=>el.classList.remove('dominant'));
+          if(this.classList.contains('selected'))this.classList.add('dominant');
           saveCurrentEntry();
         });
+      });
+      intensitySlider.addEventListener('input',()=>{updateIntensityDisplay();saveCurrentEntry();});
+      [triggerBox,responseBox,learningBox,gratitudeBox,actionBox].forEach(t=>t.addEventListener('input',saveCurrentEntry));
+      pdfButton.addEventListener('click',generatePDF);
+      prevDayBtn.addEventListener('click',navigatePrev);
+      nextDayBtn.addEventListener('click',navigateNext);
+    }
 
-        // Text areas
-        triggerBox.addEventListener('input', saveCurrentEntry);
-        responseBox.addEventListener('input', saveCurrentEntry);
-        learningBox.addEventListener('input', saveCurrentEntry);
-        gratitudeBox.addEventListener('input', saveCurrentEntry);
-        actionBox.addEventListener('input', saveCurrentEntry);
+    function updateIntensityDisplay(){
+      const val=intensitySlider.value;
+      intensityValue.textContent=`${val} - ${val<=3?'Low':val<=7?'Medium':'High'}`;
+      intensityVisual.querySelectorAll('.intensity-dot').forEach((d,i)=>d.classList.toggle('active',i<val));
+    }
 
-        // PDF button
-        pdfButton.addEventListener('click', generatePDF);
+    function loadEntry(key){
+      emotionOptions.forEach(o=>o.classList.remove('selected','dominant'));
+      [triggerBox,responseBox,learningBox,gratitudeBox,actionBox].forEach(t=>t.value='');
+      intensitySlider.value=5;
 
-        // Navigation buttons
-        prevDayBtn.addEventListener('click', navigateToPreviousDay);
-        nextDayBtn.addEventListener('click', navigateToNextDay);
-      }
-
-      // Update intensity display
-      function updateIntensityDisplay() {
-        const value = intensitySlider.value;
-        let label = '';
-
-        if (value <= 3) label = 'Low';
-        else if (value <= 7) label = 'Medium';
-        else label = 'High';
-
-        intensityValue.textContent = `${value} - ${label}`;
-
-        // Update visual indicator
-        const dots = intensityVisual.querySelectorAll('.intensity-dot');
-        dots.forEach((dot, index) => {
-          if (index < value) {
-            dot.classList.add('active');
-          } else {
-            dot.classList.remove('active');
+      if(entries[key]){
+        const e=entries[key];
+        if(e.emotions)e.emotions.forEach(em=>{
+          const el=document.querySelector(`.emotion-option[data-emotion="${em}"]`);
+          if(el){
+            el.classList.add('selected');
           }
         });
-      }
-
-      // Load an entry for a specific date
-      function loadEntry(dateKey) {
-        // Clear current selections
-        emotionOptions.forEach(option => {
-          option.classList.remove('selected');
-        });
-
-        // Reset text areas
-        triggerBox.value = '';
-        responseBox.value = '';
-        learningBox.value = '';
-        gratitudeBox.value = '';
-        actionBox.value = '';
-        intensitySlider.value = 5;
-
-        // Load the entry if it exists
-        if (entries[dateKey]) {
-          const entry = entries[dateKey];
-
-          // Set emotions
-          if (entry.emotions) {
-            entry.emotions.forEach(emotion => {
-              document.querySelector(`.emotion-option[data-emotion="${emotion}"]`).classList.add('selected');
-            });
-          }
-
-          // Set intensity
-          if (entry.intensity) {
-            intensitySlider.value = entry.intensity;
-          }
-
-          // Set text areas
-          if (entry.trigger) triggerBox.value = entry.trigger;
-          if (entry.response) responseBox.value = entry.response;
-          if (entry.learning) learningBox.value = entry.learning;
-          if (entry.gratitude) gratitudeBox.value = entry.gratitude;
-          if (entry.action) actionBox.value = entry.action;
+        /* mark the last emotion as dominant if still selected */
+        const last=e.emotions?.slice(-1)[0];
+        if(last){
+          const lastEl=document.querySelector(`.emotion-option[data-emotion="${last}"]`);
+          if(lastEl)lastEl.classList.add('dominant');
         }
-
-        // Update intensity display
-        updateIntensityDisplay();
+        if(e.intensity)intensitySlider.value=e.intensity;
+        if(e.trigger)triggerBox.value=e.trigger;
+        if(e.response)responseBox.value=e.response;
+        if(e.learning)learningBox.value=e.learning;
+        if(e.gratitude)gratitudeBox.value=e.gratitude;
+        if(e.action)actionBox.value=e.action;
       }
+      updateIntensityDisplay();
+    }
 
-      // Save the current entry to local storage
-      function saveCurrentEntry() {
-        const selectedEmotions = Array.from(document.querySelectorAll('.emotion-option.selected'))
-          .map(el => el.getAttribute('data-emotion'));
+    function saveCurrentEntry(){
+      const selected=[...document.querySelectorAll('.emotion-option.selected')].map(el=>el.dataset.emotion);
+      entries[currentDateKey]={
+        date:currentDateKey,
+        emotions:selected,
+        intensity:intensitySlider.value,
+        trigger:triggerBox.value,
+        response:responseBox.value,
+        learning:learningBox.value,
+        gratitude:gratitudeBox.value,
+        action:actionBox.value
+      };
+      localStorage.setItem('emotionJournalEntries',JSON.stringify(entries));
+      cleanupOld();
+    }
+    function cleanupOld(){
+      const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+      const todayKey=formatDateKey(new Date());
+      const fresh={};
+      Object.entries(entries).forEach(([k,v])=>{
+        if(new Date(k)>=cutoff||k===todayKey)fresh[k]=v;
+      });
+      entries=fresh;
+      localStorage.setItem('emotionJournalEntries',JSON.stringify(entries));
+    }
 
-        const entry = {
-          date: currentDateKey,
-          emotions: selectedEmotions,
-          intensity: intensitySlider.value,
-          trigger: triggerBox.value,
-          response: responseBox.value,
-          learning: learningBox.value,
-          gratitude: gratitudeBox.value,
-          action: actionBox.value
-        };
-
-        // Add to entries and save to local storage
-        entries[currentDateKey] = entry;
-        localStorage.setItem('emotionJournalEntries', JSON.stringify(entries));
-
-        // Clean up old entries (keep only last 30 days)
-        cleanUpOldEntries();
-      }
-
-      // Clean up entries older than 30 days
-      function cleanUpOldEntries() {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        const updatedEntries = {};
-        const todayKey = formatDateKey(new Date());
-
-        for (const [dateKey, entry] of Object.entries(entries)) {
-          const entryDate = new Date(dateKey);
-          if (entryDate >= thirtyDaysAgo || dateKey === todayKey) {
-            updatedEntries[dateKey] = entry;
-          }
-        }
-
-        entries = updatedEntries;
-        localStorage.setItem('emotionJournalEntries', JSON.stringify(entries));
-      }
-
-      // Navigate to previous day
-      function navigateToPreviousDay() {
-        const prevDate = new Date(currentDate);
-        prevDate.setDate(prevDate.getDate() - 1);
-
-        // Don't allow navigation beyond 30 days
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        if (prevDate >= thirtyDaysAgo) {
-          saveCurrentEntry();
-          currentDate = prevDate;
-          updateDateDisplay();
-          loadEntry(formatDateKey(currentDate));
-          updateNavButtons();
-        }
-      }
-
-      // Navigate to next day
-      function navigateToNextDay() {
-        const nextDate = new Date(currentDate);
-        nextDate.setDate(nextDate.getDate() + 1);
-        const today = new Date();
-
-        // Don't allow navigation to future dates
-        if (nextDate <= today) {
-          saveCurrentEntry();
-          currentDate = nextDate;
-          updateDateDisplay();
-          loadEntry(formatDateKey(currentDate));
-          updateNavButtons();
-        }
-      }
-
-      // Update navigation buttons state
-      function updateNavButtons() {
-        const today = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        // Previous day button
-        const prevDate = new Date(currentDate);
-        prevDate.setDate(prevDate.getDate() - 1);
-        prevDayBtn.classList.toggle('disabled', prevDate < thirtyDaysAgo);
-
-        // Next day button
-        const nextDate = new Date(currentDate);
-        nextDate.setDate(nextDate.getDate() + 1);
-        nextDayBtn.classList.toggle('disabled', nextDate > today);
-      }
-
-      // Function to generate PDF
-      function generatePDF() {
-        // First save the current entry
+    function navigatePrev(){
+      const prev=new Date(currentDate);prev.setDate(prev.getDate()-1);
+      const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+      if(prev>=cutoff){
         saveCurrentEntry();
-
-        // Show loading overlay
-        loadingOverlay.classList.add('active');
-
-        // Get the journal container element
-        const element = document.querySelector('.journal-container');
-
-        // Create a clone to avoid capturing the overlay and arrows
-        const clone = element.cloneNode(true);
-        clone.querySelector('#loading-overlay').style.display = 'none';
-        clone.querySelectorAll('.nav-arrow').forEach(el => el.style.display = 'none');
-        clone.querySelector('.disclaimer-top').style.display = 'none';
-
-        // Make sure textareas have white background for PDF
-        clone.querySelectorAll('.write-box').forEach(textarea => {
-          // Create a div to display text instead of textarea for PDF
-          const textDiv = document.createElement('div');
-          textDiv.className = 'write-box';
-          textDiv.style.height = 'auto';
-          textDiv.style.minHeight = '120px';
-          textDiv.style.whiteSpace = 'pre-wrap';
-          textDiv.style.wordWrap = 'break-word';
-          textDiv.textContent = textarea.value;
-
-          // Replace textarea with div
-          textarea.parentNode.replaceChild(textDiv, textarea);
-        });
-
-        // Append to body so we can capture it
-        clone.style.position = 'absolute';
-        clone.style.left = '-9999px';
-        clone.style.width = '900px';
-        document.body.appendChild(clone);
-
-        // Use html2canvas to capture the journal as an image
-        html2canvas(clone, {
-          scale: 2, // Higher quality
-          useCORS: true,
-          logging: false,
-          backgroundColor: '#ffffff',
-          allowTaint: true
-        }).then(canvas => {
-          // Remove the clone
-          document.body.removeChild(clone);
-
-          const imgData = canvas.toDataURL('image/png');
-          const pdf = new jsPDF('p', 'mm', 'a4');
-
-          // Calculate dimensions to fit A4
-          const imgWidth = canvas.width;
-          const imgHeight = canvas.height;
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
-
-          // Add image to PDF
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-          // Create filename with current date
-          const filename = `emotion-journal-${currentDateKey}.pdf`;
-
-          // Save the PDF
-          pdf.save(filename);
-
-          // Hide loading overlay
-          setTimeout(() => {
-            loadingOverlay.classList.remove('active');
-          }, 500);
-        }).catch(error => {
-          console.error('Error generating PDF:', error);
-          loadingOverlay.classList.remove('active');
-          alert('Error generating PDF. Please try again.');
-        });
+        currentDate=prev;updateDateDisplay();loadEntry(formatDateKey(currentDate));updateNavButtons();
       }
-    });
+    }
+    function navigateNext(){
+      const next=new Date(currentDate);next.setDate(next.getDate()+1);
+      const today=new Date();
+      if(next<=today){
+        saveCurrentEntry();
+        currentDate=next;updateDateDisplay();loadEntry(formatDateKey(currentDate));updateNavButtons();
+      }
+    }
+    function updateNavButtons(){
+      const today=new Date();
+      const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+      const prev=new Date(currentDate);prev.setDate(prev.getDate()-1);
+      const next=new Date(currentDate);next.setDate(next.getDate()+1);
+      prevDayBtn.classList.toggle('disabled',prev<cutoff);
+      nextDayBtn.classList.toggle('disabled',next>today);
+    }
+
+    /* lightweight JPEG PDF */
+    function generatePDF(){
+      saveCurrentEntry();
+      loadingOverlay.classList.add('active');
+
+      const element=document.querySelector('.journal-container');
+      const clone=element.cloneNode(true);
+      clone.querySelector('#loading-overlay').style.display='none';
+      clone.querySelectorAll('.nav-arrow').forEach(el=>el.style.display='none');
+      clone.querySelector('.disclaimer-top').style.display='none';
+      clone.querySelectorAll('.write-box').forEach(t=>{
+        const d=document.createElement('div');
+        d.className='write-box';
+        d.style.minHeight='120px';
+        d.style.whiteSpace='pre-wrap';
+        d.textContent=t.value;
+        t.parentNode.replaceChild(d,t);
+      });
+      clone.style.position='absolute';
+      clone.style.left='-9999px';
+      clone.style.width='900px';
+      document.body.appendChild(clone);
+
+      html2canvas(clone,{scale:1,useCORS:true,backgroundColor:'#fff',allowTaint:true,logging:false}).then(canvas=>{
+        document.body.removeChild(clone);
+        const img=canvas.toDataURL('image/jpeg',0.85);
+        const pdf=new jsPDF('p','mm','a4',true);
+        const w=pdf.internal.pageSize.getWidth();
+        const h=(canvas.height*w)/canvas.width;
+        pdf.addImage(img,'JPEG',0,0,w,h,undefined,'FAST');
+        pdf.save(`emotion-journal-${currentDateKey}.pdf`);
+      }).catch(e=>{
+        console.error(e);alert('Error generating PDF. Please try again.');
+      }).finally(()=>loadingOverlay.classList.remove('active'));
+    }
+  });
   </script>
 
   <!-- ──────────────────────────────────────────────────────────── -->
-  <!-- NEW: copy-protection JS (additive, after originals)          -->
+  <!-- COPY-PROTECTION JS                                          -->
   <!-- ──────────────────────────────────────────────────────────── -->
   <script id="copy-protect-js">
-    /* Harden against casual copy/paste & DevTools */
-    document.addEventListener('DOMContentLoaded', () => {
-
-      /* 1. Disable right-click everywhere except editable areas */
-      document.addEventListener('contextmenu', e => {
-        if (!e.target.closest('textarea, input, [contenteditable="true"]')) {
-          e.preventDefault();
-        }
+    document.addEventListener('DOMContentLoaded',()=>{
+      document.addEventListener('contextmenu',e=>{
+        if(!e.target.closest('textarea,input,[contenteditable="true"]'))e.preventDefault();
       });
-
-      /* 2. Block copy / cut outside editable areas */
-      ['copy', 'cut'].forEach(evt =>
-        document.addEventListener(evt, e => {
-          if (!e.target.closest('textarea, input, [contenteditable="true"]')) {
-            e.preventDefault();
-          }
-        }, true)
-      );
-
-      /* 3. Stop common DevTools / save / select-all shortcuts */
-      document.addEventListener('keydown', e => {
-        const k = e.key.toLowerCase();
-        if (
-          /* F12 */
-          k === 'f12' ||
-          /* Ctrl/Cmd + Shift + I/J/C */
-          ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c'].includes(k)) ||
-          /* Ctrl/Cmd + U/S/A/C (view-source, save, select-all, copy) */
-          ((e.ctrlKey || e.metaKey) && ['u','s','a','c'].includes(k))
-        ) {
+      ['copy','cut'].forEach(evt=>document.addEventListener(evt,e=>{
+        if(!e.target.closest('textarea,input,[contenteditable="true"]'))e.preventDefault();
+      },true));
+      document.addEventListener('keydown',e=>{
+        const k=e.key.toLowerCase();
+        if(k==='f12'||((e.ctrlKey||e.metaKey)&&e.shiftKey&&['i','j','c'].includes(k))||((e.ctrlKey||e.metaKey)&&['u','s','a','c'].includes(k))){
           e.preventDefault();
         }
-      }, true);
-
-      /* 4. Prevent text-selection outside editable areas */
-      document.addEventListener('selectstart', e => {
-        if (!e.target.closest('textarea, input, [contenteditable="true"]')) {
-          e.preventDefault();
-        }
-      }, true);
+      },true);
+      document.addEventListener('selectstart',e=>{
+        if(!e.target.closest('textarea,input,[contenteditable="true"]'))e.preventDefault();
+      },true);
     });
   </script>
 </body>
