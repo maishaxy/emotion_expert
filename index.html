@@ -6,6 +6,7 @@
   <meta name="robots" content="noindex, noarchive">
   <title>Daily Emotion Journal</title>
 
+  <!-- libs -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -268,47 +269,74 @@
     }
 
     function updateNavButtons(){
-      const prevKey=formatDateKey(new Date(currentDate.getTime()-86400000)); // one day earlier
+      const prevKey=formatDateKey(new Date(currentDate.getTime()-86400000));
       prevDayBtn.classList.toggle('disabled',!entries[prevKey]);
       const tomorrow=new Date(currentDate.getTime()+86400000);
       nextDayBtn.classList.toggle('disabled',tomorrow>new Date());
     }
 
+    /* ── PDF GENERATION WITHOUT ANY SHADES ───────────────────── */
     function generatePDF(){
       saveEntry();
       loadingOverlay.classList.add('active');
 
       const element=document.querySelector('.journal-container');
       const clone=element.cloneNode(true);
+
+      /* Strip UI bits & all shadows/grey panels */
       clone.querySelector('#loading-overlay').style.display='none';
-      clone.querySelectorAll('.nav-arrow').forEach(el=>el.style.display='none');
-      clone.querySelector('.disclaimer-top').style.display='none';
-      clone.style.boxShadow='none';clone.style.borderRadius='0';
+      clone.querySelectorAll('.nav-arrow,.journal-footer,.disclaimer-top').forEach(el=>el.style.display='none');
+
+      /* remove box-shadows & light-grey backgrounds */
+      clone.querySelectorAll('*').forEach(el=>{
+        el.style.boxShadow='none';
+        if(getComputedStyle(el).backgroundColor.match(/rgb\(248, 249, 252\)/))el.style.background='#ffffff';
+      });
+
+      /* render textarea text */
       clone.querySelectorAll('.write-box').forEach(t=>{
-        const div=document.createElement('div');div.className='write-box';div.style.minHeight='120px';div.style.whiteSpace='pre-wrap';div.textContent=t.value;t.parentNode.replaceChild(div,t);});
-      clone.style.position='absolute';clone.style.left='-9999px';clone.style.width='900px';document.body.appendChild(clone);
+        const d=document.createElement('div');
+        d.className='write-box';
+        d.style.minHeight='120px';
+        d.style.whiteSpace='pre-wrap';
+        d.textContent=t.value;
+        t.parentNode.replaceChild(d,t);
+      });
+
+      clone.style.boxShadow='none';
+      clone.style.borderRadius='0';
+      clone.style.position='absolute';
+      clone.style.left='-9999px';
+      clone.style.width='900px';
+      document.body.appendChild(clone);
 
       html2canvas(clone,{scale:1,useCORS:true,backgroundColor:'#ffffff',allowTaint:true,logging:false}).then(canvas=>{
         document.body.removeChild(clone);
-        const img=canvas.toDataURL('image/jpeg',0.85);
+
+        const imgData=canvas.toDataURL('image/jpeg',0.85);
         const pdf=new jsPDF('p','mm','a4',true);
+
         const pageW=pdf.internal.pageSize.getWidth();
         const pageH=pdf.internal.pageSize.getHeight();
         const imgW=pageW;
         const imgH=canvas.height*pageW/canvas.width;
 
-        let position=0;
-        pdf.addImage(img,'JPEG',0,position,imgW,imgH,'','FAST');
-        let heightLeft=imgH-pageH;
-        while(heightLeft>0){
-          position-=pageH;
+        let pos=0;
+        pdf.addImage(imgData,'JPEG',0,pos,imgW,imgH,'','FAST');
+        let remaining=imgH-pageH;
+
+        while(remaining>5){
+          pos-=pageH;
           pdf.addPage();
-          pdf.addImage(img,'JPEG',0,position,imgW,imgH,'','FAST');
-          heightLeft-=pageH;
+          pdf.addImage(imgData,'JPEG',0,pos,imgW,imgH,'','FAST');
+          remaining-=pageH;
         }
+
         pdf.save(`emotion-journal-${currentDateKey}.pdf`);
-      }).catch(e=>{console.error(e);alert('Error generating PDF. Please try again.')})
-        .finally(()=>loadingOverlay.classList.remove('active'));
+      }).catch(err=>{
+        console.error(err);
+        alert('Error generating PDF. Please try again.');
+      }).finally(()=>loadingOverlay.classList.remove('active'));
     }
   });
   </script>
