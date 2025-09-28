@@ -123,7 +123,39 @@
       a[href]::after{content:" (" attr(href) ")";font-size:11px;color:#555}
     }
   </style>
-</head>
+<style id="mobile-tweaks">
+/* --- Mobile tweaks (<=640px) --- */
+@media (max-width: 640px) {
+  :root { font-size: 16px; }
+  body { padding-left: 12px; padding-right: 12px; }
+  .grid { display: grid; grid-template-columns: 1fr !important; gap: 12px !important; }
+  .row { display: grid !important; grid-template-columns: 1fr !important; gap: 12px !important; }
+  .card { padding: 12px !important; border-radius: 16px; }
+  #dashboard { margin-top: 8px; }
+  nav#toc { position: sticky; top: 0; background: var(--surface, #fff); padding: 8px 0; z-index: 50; border-bottom: 1px solid rgba(0,0,0,.06); }
+  nav#toc a { display: inline-block; margin-right: 10px; font-size: 0.95rem; padding: 6px 8px; border-radius: 10px; }
+  input, select, textarea, button { width: 100%; min-height: 40px; }
+  canvas, svg, img { max-width: 100% !important; height: auto !important; }
+  /* Score blocks as responsive grid */
+  .kpis, .stats, .score-row, .gauges, .metrics { 
+    display: grid !important; 
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important; 
+    gap: 12px !important; 
+  }
+}
+</style><style id="hamburger-fixed">
+/* Pin hamburger to top-left */
+#mobileMenuBtn {
+  position: fixed !important;
+  top: 12px !important;
+  left: 12px !important;
+  z-index: 1100 !important;
+}
+/* Give page some top padding on small screens so content doesn't sit under the button */
+@media (max-width: 640px) {
+  body { padding-top: 56px; }
+}
+</style></head>
 <body data-theme="dark">
 <div class="app">
 <aside id="sidebar">
@@ -135,7 +167,7 @@
 </div>
 </div>
 <div class="tag">💡 Tip: Your entries auto‑save in this browser.</div>
-<nav class="nav" id="toc"><a href="#disclaimer">ℹ️ Disclaimer</a>
+<nav class="nav" id="toc"><a href="#dashboard">📊 Dashboard</a><a href="#disclaimer">ℹ️ Disclaimer</a>
 <a class="active" href="#cover">🏠 Cover</a>
 <a href="#skill-audit">🧭 Skill Audit</a>
 <a href="#weekly">📆 Weekly Upskilling</a>
@@ -161,7 +193,14 @@
 </div>
 <h1 style="margin:0">AI‑Proof Career Planner</h1>
 </div>
-<div class="overlay" id="overlay"></div>
+<div class="overlay" id="overlay"></div><section aria-label="Score Dashboard" id="dashboard"><div class="card"><h2>📊 Score Dashboard</h2><div class="card" style="text-align:center; background:var(--panel-2)">
+<h3>Overall Resilience Score</h3>
+<div class="canvas-container" style="display:grid;place-items:center;margin:10px 0 6px">
+<canvas aria-label="Resilience score gauge" height="260" id="scoreDial" width="260"></canvas>
+</div>
+<div aria-hidden="true" class="progress"><i id="scoreBar"></i></div>
+<div class="small muted" id="scoreText" style="margin-top:8px">0</div>
+</div></div></section>
 <header class="desktop-header" style="display:none">
 <h1>AI‑Proof Career Planner</h1>
 <p class="sub">A guided workspace to identify automation risks, plan learning, track resilience, and grow your professional brand.</p>
@@ -292,15 +331,6 @@
 </div>
 </div>
 <div>
-<div class="card" style="text-align:center; background:var(--panel-2)">
-<h3>Overall Resilience Score</h3>
-<div class="canvas-container" style="display:grid;place-items:center;margin:10px 0 6px">
-<canvas aria-label="Resilience score gauge" height="260" id="scoreDial" width="260"></canvas>
-</div>
-<div aria-hidden="true" class="progress"><i id="scoreBar"></i></div>
-<div class="small muted" id="scoreText" style="margin-top:8px">0</div>
-</div>
-
 </div>
 </div>
 </section>
