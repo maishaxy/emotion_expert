@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>AI‑Proof Career Planner</title>
+<meta content="A printable + interactive planner to future‑proof your career: skill audit, weekly upskilling plans, resilience tracker, networking and personal branding." name="description"/>
+<style>
+    :root{
+      --bg: #0b0c10;
+      --panel: #111318;
+      --panel-2: #151922;
+      --text: #e8eaee;
+      --muted: #b9c0cc;
+      --accent: #5dd4b6;
+      --accent-2:#6aa5ff;
+      --danger:#ff6b6b;
+      --warn:#f7b267;
+      --ok:#4cd964;
+      --border: #232736;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    [data-theme="light"]{
+      --bg:#f7f8fb; --panel:#ffffff; --panel-2:#f2f5fb; --text:#0f172a; --muted:#55607a; --border:#e5e9f2; --shadow: 0 8px 24px rgba(10, 14, 29, .08);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+    aside{background:linear-gradient(180deg,var(--panel),var(--panel-2));border-right:1px solid var(--border);padding:24px;position:sticky;top:0;height:100vh;overflow-y:auto}
+    main{padding:24px 28px;overflow-x:hidden}
+
+    h1{font-weight:800;letter-spacing:.2px;margin:0 0 8px;font-size:clamp(1.5rem, 4vw, 2rem);}
+    .sub{color:var(--muted);margin:0 0 24px;font-size:clamp(0.9rem, 2vw, 1rem);}
+    h2{margin:24px 0 12px;font-size:22px;font-size:clamp(1.25rem, 3vw, 1.5rem);}
+    h3{margin:16px 0 10px;font-size:18px;color:var(--muted);font-size:clamp(1rem, 2.5vw, 1.25rem);}
+
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    .logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:#05130e;font-weight:900}
+    .tag{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border:1px dashed var(--border);border-radius:12px;color:var(--muted);font-size:12px}
+
+    .nav{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .nav a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;color:var(--text);text-decoration:none;border:1px solid transparent}
+    .nav a:hover{background:rgba(255,255,255,.05);border-color:var(--border)}
+    .nav a.active{background:linear-gradient(135deg,rgba(93,212,182,.1),rgba(106,165,255,.06));border-color:transparent}
+    .nav svg{opacity:.8}
+
+    .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 20px}
+    .btn{appearance:none;border:none;background:var(--panel);border:1px solid var(--border);padding:10px 12px;border-radius:12px;color:var(--text);cursor:pointer;display:inline-flex;gap:8px;align-items:center;box-shadow:var(--shadow);font-size:14px}
+    .btn:hover{transform:translateY(-1px)}
+
+    .grid{display:grid;gap:16px}
+    .grid.cols-2{grid-template-columns:1fr 1fr}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 16px 14px;box-shadow:var(--shadow);overflow:hidden}
+    .card h3{margin-top:2px}
+
+    label{display:block;margin:8px 0 6px;color:var(--muted);font-size:13px}
+    input[type="text"], input[type="week"], input[type="date"], textarea, select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);font-size:14px}
+    textarea{min-height:100px;resize:vertical}
+    .row{display:flex;gap:10px}
+    .row> *{flex:1}
+
+    table{width:100%;border-collapse:separate;border-spacing:0 10px}
+    th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;padding:0 10px}
+    td{background:var(--panel-2);border:1px solid var(--border);padding:10px;border-radius:10px}
+
+    .risk-low{outline:1px solid rgba(76,217,100,.35);background:linear-gradient(180deg,rgba(76,217,100,.10),transparent)}
+    .risk-med{outline:1px solid rgba(247,178,103,.35);background:linear-gradient(180deg,rgba(247,178,103,.10),transparent)}
+    .risk-high{outline:1px solid rgba(255,107,107,.35);background:linear-gradient(180deg,rgba(255,107,107,.10),transparent)}
+
+    .summary{display:flex;gap:10px;flex-wrap:wrap}
+    .pill{background:var(--panel-2);border:1px solid var(--border);padding:8px 12px;border-radius:999px;color:var(--muted);font-size:13px}
+
+    .progress{height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;border:1px solid var(--border)}
+    .progress>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+
+    .checklist{display:grid;gap:10px}
+    .check{display:flex;gap:10px;align-items:flex-start}
+    .check input[type="checkbox"]{width:18px;height:18px;margin-top:2px}
+    .check .title{font-weight:600}
+
+    .muted{color:var(--muted)}
+    .small{font-size:12px}
+
+    footer{margin:28px 0 40px;color:var(--muted)}
+
+    /* mobile */
+    @media (max-width: 980px){
+      .app{grid-template-columns:1fr}
+      aside{position:fixed;height:100vh;width:280px;z-index:100;transform:translateX(-100%);transition:transform 0.3s ease}
+      aside.active{transform:translateX(0)}
+      main{padding:16px}
+      .grid.cols-2,.grid.cols-3{grid-template-columns:1fr}
+      .row{flex-direction:column}
+      .mobile-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+      .mobile-menu-btn{display:flex;align-items:center;gap:8px}
+      .mobile-menu-btn .hamburger{display:flex;flex-direction:column;gap:4px;width:20px}
+      .mobile-menu-btn .hamburger span{height:2px;background:var(--text);border-radius:2px;transition:all 0.3s ease}
+      .mobile-menu-btn.active .hamburger span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+      .mobile-menu-btn.active .hamburger span:nth-child(2){opacity:0}
+      .mobile-menu-btn.active .hamburger span:nth-child(3){transform:rotate(-45deg) translate(7px,-6px)}
+      .overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99;display:none}
+      .overlay.active{display:block}
+      .table-container{overflow-x:auto;margin:0 -16px;padding:0 16px}
+      table{min-width:700px}
+      .card{padding:12px}
+      .toolbar{justify-content:center}
+      .btn{padding:8px 10px;font-size:12px}
+      .canvas-container{transform:scale(0.8);transform-origin:center}
+    }
+
+    /* Print styles */
+    @media print{
+      :root{--bg:#fff;--panel:#fff;--panel-2:#fff;--text:#000;--muted:#333;--border:#ccc;--shadow:none}
+      aside,.toolbar,.mobile-header{display:none!important}
+      main{padding:0}
+      .card{box-shadow:none;border:1px solid var(--border)}
+      a[href]::after{content:" (" attr(href) ")";font-size:11px;color:#555}
+    }
+  </style>
+</head>
+<body data-theme="dark">
+<div class="app">
+<aside id="sidebar">
+<div class="brand">
+<div aria-hidden="true" class="logo">AI</div>
+<div>
+<div style="font-weight:800">AI‑Proof Career Planner</div>
+<div class="small muted">Future‑proof with clarity + action</div>
+</div>
+</div>
+<div class="tag">💡 Tip: Your entries auto‑save in this browser.</div>
+<nav class="nav" id="toc"><a href="#disclaimer">ℹ️ Disclaimer</a>
+<a class="active" href="#cover">🏠 Cover</a>
+<a href="#skill-audit">🧭 Skill Audit</a>
+<a href="#weekly">📆 Weekly Upskilling</a>
+<a href="#resilience">🛡️ Resilience Tracker</a>
+<a href="#networking">🤝 Networking &amp; Brand</a>
+<a href="#reflection">📝 Reflection</a>
+<a href="#closing">✨ Closing</a>
+</nav>
+<div style="height:24px"></div>
+<div class="checklist small muted">
+<div>Made for printing • GoodNotes • Notability • Desktop</div>
+</div>
+</aside>
+<main>
+<div class="mobile-header">
+<div class="mobile-menu-btn" id="mobileMenuBtn">
+<div class="hamburger">
+<span></span>
+<span></span>
+<span></span>
+</div>
+<span>Menu</span>
+</div>
+<h1 style="margin:0">AI‑Proof Career Planner</h1>
+</div>
+<div class="overlay" id="overlay"></div>
+<header class="desktop-header" style="display:none">
+<h1>AI‑Proof Career Planner</h1>
+<p class="sub">A guided workspace to identify automation risks, plan learning, track resilience, and grow your professional brand.</p>
+<div class="toolbar">
+<button class="btn" id="themeToggle" title="Toggle theme">🌓 Theme</button>
+<button class="btn" onclick="window.print()" title="Print or save to PDF">🖨️ Print / Export PDF</button>
+<button class="btn" id="resetAll" title="Clear all saved data">♻️ Reset Data</button>
+</div>
+</header>
+<!-- COVER -->
+<section class="card" id="disclaimer"><h2>🔒 Privacy &amp; Storage</h2><p class="small muted">This planner saves your entries in your browser (localStorage). No data is accessed by anyone else or sent to a server. To reset or if a template change doesn’t appear, delete this site’s cache/local storage or use the “Reset Data” button. Delete cache to see the change.</p></section><section class="card" id="cover">
+<div class="grid cols-2">
+<div><label for="owner">This planner belongs to</label><input class="persist" id="owner" placeholder="Your name" type="text"/><div class="row"><div><label for="start">Start date</label><input class="persist" id="start" type="date"/></div><div><label for="end">End date</label><input class="persist" id="end" type="date"/></div></div></div>
+<div>
+<h3>How to use this planner</h3>
+<ul class="small muted">
+<li>Start with a <strong>Skill Audit</strong> to map tasks vs. automation risk.</li>
+<li>Pick a weekly <strong>Skill Focus</strong> and schedule micro‑learning.</li>
+<li>Track your <strong>Resilience Score</strong> and habits.</li>
+<li>Strengthen your network and <strong>personal brand</strong>.</li>
+<li>Print or export to PDF anytime—your edits auto‑save here.</li>
+</ul>
+</div>
+</div>
+</section>
+<!-- SKILL AUDIT -->
+<section class="card" id="skill-audit">
+<h2>🧭 Skill Audit Worksheets</h2>
+<p class="muted small">List your routine tasks. Estimate automation risk and decide your strategy: <em>Elevate (learn more), Automate (use tools), Delegate, or Double‑down on human strengths.</em></p>
+<div class="summary" id="auditSummary">
+<div class="pill">Tasks: <b id="auditCount">0</b></div>
+<div class="pill">Exposure: <b id="exposure">0%</b></div>
+</div>
+<div style="height:8px"></div>
+<div class="table-container">
+<table aria-describedby="skill-audit">
+<thead>
+<tr>
+<th style="width:22%">Task</th>
+<th style="width:14%">Risk</th>
+<th style="width:22%">AI Tools (influence)</th>
+<th style="width:22%">Human Advantage</th>
+<th style="width:12%">Strategy</th>
+<th style="width:8%"></th>
+</tr>
+</thead>
+<tbody id="auditBody"></tbody>
+</table>
+</div>
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+<button class="btn" id="addAuditRow">＋ Add Task</button>
+</div>
+</section>
+<!-- WEEKLY UPSKILLING -->
+<section class="card" id="weekly">
+<h2>📆 Weekly Upskilling Planner</h2>
+<div class="grid cols-3">
+<div>
+<label for="weekOf">Week of</label>
+<input class="persist" id="weekOf" type="date"/>
+</div>
+<div>
+<label for="skillFocus">Skill focus</label>
+<input class="persist" id="skillFocus" placeholder="e.g., Prompt Engineering, SQL, Public Speaking" type="text"/>
+</div>
+<div>
+<label for="timeGoal">Time goal</label>
+<select class="persist" id="timeGoal">
+<option value="2">2 hrs</option>
+<option selected="" value="4">4 hrs</option>
+<option value="6">6 hrs</option>
+<option value="8">8+ hrs</option>
+</select>
+</div>
+</div>
+<div class="grid cols-2" style="margin-top:10px">
+<div class="card" style="background:var(--panel-2)">
+<h3>Learning Resources</h3>
+<label class="small" for="resources">Links, courses, mentors</label>
+<textarea class="persist" id="resources" placeholder="Paste links or notes here...\n• Course: \n• Article: \n• Mentor: "></textarea>
+</div>
+<div class="card" style="background:var(--panel-2)">
+<h3>Reflection</h3>
+<label class="small" for="reflection">Capture key takeaways and how you'll apply them</label>
+<textarea class="persist" id="reflection" placeholder="This week I learned…\nNext, I will apply it by…"></textarea>
+</div>
+</div>
+<div class="card" style="margin-top:12px;background:var(--panel-2)">
+<h3>Daily Micro‑Goals</h3>
+<div class="grid cols-3" id="microGoals"></div>
+</div>
+</section>
+<!-- RESILIENCE TRACKER -->
+<section class="card" id="resilience">
+<h2>🛡️ Career Resilience Tracker</h2>
+<p class="muted small">Rate yourself 0–100 for each dimension. Your overall score updates live.</p>
+<div class="grid cols-2">
+<div>
+<div class="row">
+<div class="card" style="background:var(--panel-2)">
+<label>Technical Skills</label>
+<input class="persist metric" id="mTech" max="100" min="0" type="range" value="40"/>
+</div>
+<div class="card" style="background:var(--panel-2)">
+<label>Soft Skills</label>
+<input class="persist metric" id="mSoft" max="100" min="0" type="range" value="50"/>
+</div>
+</div>
+<div class="row">
+<div class="card" style="background:var(--panel-2)">
+<label>Adaptability</label>
+<input class="persist metric" id="mAdapt" max="100" min="0" type="range" value="50"/>
+</div>
+<div class="card" style="background:var(--panel-2)">
+<label>Network Strength</label>
+<input class="persist metric" id="mNet" max="100" min="0" type="range" value="35"/>
+</div>
+</div>
+<div class="row">
+<div class="card" style="background:var(--panel-2)">
+<label>Personal Brand</label>
+<input class="persist metric" id="mBrand" max="100" min="0" type="range" value="30"/>
+</div>
+<div class="card" style="background:var(--panel-2)">
+<label>AI Literacy</label>
+<input class="persist metric" id="mAI" max="100" min="0" type="range" value="40"/>
+</div>
+</div>
+</div>
+<div>
+<div class="card" style="text-align:center; background:var(--panel-2)">
+<h3>Overall Resilience Score</h3>
+<div class="canvas-container" style="display:grid;place-items:center;margin:10px 0 6px">
+<canvas aria-label="Resilience score gauge" height="260" id="scoreDial" width="260"></canvas>
+</div>
+<div aria-hidden="true" class="progress"><i id="scoreBar"></i></div>
+<div class="small muted" id="scoreText" style="margin-top:8px">0</div>
+</div>
+
+</div>
+</div>
+</section>
+<!-- NETWORKING & BRAND -->
+<section class="card" id="networking">
+<h2>🤝 Networking &amp; Personal Branding</h2>
+<div class="grid cols-2">
+<div class="card" style="background:var(--panel-2)">
+<h3>Networking Goals (this month)</h3>
+<div class="checklist" id="networkList"></div>
+<div class="row">
+<input id="networkInput" placeholder="Add a person, event, or community" type="text"/>
+<button class="btn" id="addNetwork">Add</button>
+</div>
+</div>
+<div class="card" style="background:var(--panel-2)">
+<h3>Branding Actions</h3>
+<div class="checklist" id="brandList"></div>
+<div class="row">
+<input id="brandInput" placeholder="Add a branding task (e.g., Update LinkedIn banner)" type="text"/>
+<button class="btn" id="addBrand">Add</button>
+</div>
+</div>
+</div>
+</section>
+<!-- REFLECTION -->
+<section class="card" id="reflection">
+<h2>📝 Reflection &amp; Reviews</h2>
+<div class="grid cols-2">
+<div class="card" style="background:var(--panel-2)">
+<h3>Monthly Reflection</h3>
+<label class="small" for="monthly">Prompts: What went well? Which skill improved most? Where do I need support?</label>
+<textarea class="persist" id="monthly" placeholder="• Wins\n• Challenges\n• Lessons\n• Next steps"></textarea>
+</div>
+<div class="card" style="background:var(--panel-2)">
+<h3>Quarterly Review</h3>
+<label class="small" for="quarterly">Prompts: Top 3 achievements; Top 3 priorities next quarter.</label>
+<textarea class="persist" id="quarterly" placeholder="Achievements →\n1)\n2)\n3)\n\nPriorities →\n1)\n2)\n3)"></textarea>
+</div>
+</div>
+</section>
+<!-- CLOSING -->
+<section class="card" id="closing">
+<h2>✨ Closing</h2>
+<blockquote class="muted" style="margin:8px 0 0">"AI won't replace you. But someone using AI might. Stay adaptable, keep learning, and future‑proof your career."</blockquote>
+<footer class="small">Designed as a printable + interactive template. Export anytime via <em>Print / Save as PDF</em>. For Etsy, bundle with instructions &amp; mockups.</footer>
+</section>
+</main>
+</div>
+<script>
+    // ---------- Mobile Menu ----------
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    
+    function toggleMobileMenu() {
+      mobileMenuBtn.classList.toggle('active');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+    
+    mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+    overlay.addEventListener('click', toggleMobileMenu);
+    
+    // Close menu when clicking on a nav link
+    document.querySelectorAll('#toc a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 980) {
+          toggleMobileMenu();
+        }
+      });
+    });
+
+    // ---------- Theme toggle ----------
+    const themeBtn = document.getElementById('themeToggle');
+    themeBtn.addEventListener('click', ()=>{
+      const next = document.body.getAttribute('data-theme') === 'dark' ? 'light':'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('planner-theme', next);
+    });
+    const savedTheme = localStorage.getItem('planner-theme');
+    if(savedTheme) document.body.setAttribute('data-theme', savedTheme);
+
+    // ---------- Persistence ----------
+    function saveField(el){
+      if(!el.id) return; // only elements with IDs
+      const key = 'planner:' + el.id;
+      const val = (el.type === 'checkbox') ? el.checked : el.value;
+      localStorage.setItem(key, JSON.stringify(val));
+    }
+    function loadField(el){
+      const key = 'planner:' + el.id;
+      const raw = localStorage.getItem(key);
+      if(raw !== null){
+        const val = JSON.parse(raw);
+        if(el.type === 'checkbox') el.checked = !!val; else el.value = val;
+      }
+    }
+    function wirePersist(){
+      document.querySelectorAll('.persist').forEach(el=>{
+        loadField(el);
+        el.addEventListener('input', ()=>saveField(el));
+        el.addEventListener('change', ()=>saveField(el));
+      });
+    }
+    wirePersist();
+
+    // Reset all
+    document.getElementById('resetAll').addEventListener('click', ()=>{
+      if(!confirm('Clear all saved planner data?')) return;
+      Object.keys(localStorage).forEach(k=>{ if(k.startsWith('planner:')) localStorage.removeItem(k); });
+      location.reload();
+    });
+
+    // ---------- Skill Audit Table ----------
+    const auditBody = document.getElementById('auditBody');
+    const addAuditBtn = document.getElementById('addAuditRow');
+    const exposureEl = document.getElementById('exposure');
+    const auditCountEl = document.getElementById('auditCount');
+
+    const RISK_MAP = { low: 25, medium: 60, high: 90 };
+
+    function rowTemplate(idx, data={}){
+      const id = (n)=>`audit_${idx}_${n}`;
+      return `<tr data-row="${idx}">
+        <td><input class="persist" id="${id('task')}" type="text" placeholder="e.g., Write monthly report"/></td>
+        <td>
+          <select class="persist riskSel" id="${id('risk')}">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </td>
+        <td><input class="persist" id="${id('tools')}" type="text" placeholder="e.g., ChatGPT, Jasper, Copilot"/></td>
+        <td><input class="persist" id="${id('human')}" type="text" placeholder="e.g., Stakeholder empathy, strategy"/></td>
+        <td>
+          <select class="persist" id="${id('strategy')}">
+            <option>Elevate</option>
+            <option>Automate</option>
+            <option>Delegate</option>
+            <option>Double‑down</option>
+          </select>
+        </td>
+        <td style="text-align:right">
+          <button class="btn small delRow" title="Remove">✖</button>
+        </td>
+      </tr>`;
+    }
+
+    function updateRowRiskClass(tr){
+      const sel = tr.querySelector('.riskSel');
+      const risk = sel?.value || 'low';
+      tr.classList.remove('risk-low','risk-med','risk-high');
+      tr.classList.add(
+        risk==='high' ? 'risk-high' : risk==='medium' ? 'risk-med' : 'risk-low'
+      );
+    }
+
+    function calcExposure(){
+      const rows = [...auditBody.querySelectorAll('tr')];
+      auditCountEl.textContent = rows.length;
+      if(rows.length === 0){ exposureEl.textContent = '0%'; return; }
+      const avg = rows.reduce((acc,tr)=>{
+        const risk = tr.querySelector('.riskSel')?.value || 'low';
+        return acc + (RISK_MAP[risk]||0);
+      },0) / rows.length;
+      exposureEl.textContent = Math.round(avg) + '%';
+    }
+
+    function addAuditRow(prefill){
+      const idx = Date.now() + Math.floor(Math.random()*1000);
+      auditBody.insertAdjacentHTML('beforeend', rowTemplate(idx));
+      wirePersist();
+      const tr = auditBody.lastElementChild;
+      updateRowRiskClass(tr);
+      tr.querySelectorAll('select,input').forEach(el=>{
+        el.addEventListener('change', ()=>{ updateRowRiskClass(tr); calcExposure(); });
+        el.addEventListener('input', ()=>{ if(el.classList.contains('riskSel')) updateRowRiskClass(tr); });
+      });
+      tr.querySelector('.delRow').addEventListener('click', ()=>{ tr.remove(); calcExposure(); });
+      calcExposure();
+    }
+
+    // Load existing audit rows from storage
+    (function restoreAudit(){
+      // find all keys that look like audit rows
+      const keys = Object.keys(localStorage).filter(k=>k.startsWith('planner:audit_'));
+      const rows = new Set(keys.map(k => k.split(':')[1].split('_').slice(0,2).join('_')));
+      if(rows.size===0){
+        // seed with three example rows
+        addAuditRow(); addAuditRow(); addAuditRow();
+      } else {
+        // Recreate rows by unique row ids present in storage
+        const ids = new Set(keys.map(k => k.split(':')[1].split('_').slice(0,2).join('_')));
+        ids.forEach(() => addAuditRow());
+      }
+      // After adding, load persisted values already handled by wirePersist
+      requestAnimationFrame(calcExposure);
+    })();
+
+    addAuditBtn.addEventListener('click', ()=> addAuditRow());
+
+    // ---------- Weekly Micro‑Goals ----------
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const micro = document.getElementById('microGoals');
+    days.forEach((d,i)=>{
+      const idText = `goal_${d.toLowerCase()}_text`;
+      const idDone = `goal_${d.toLowerCase()}_done`;
+      micro.insertAdjacentHTML('beforeend', `
+        <div class="card">
+          <div class="muted small">${d}</div>
+          <input class="persist" id="${idText}" type="text" placeholder="What tiny step will you take?"/>
+          <label class="small" style="display:flex;gap:8px;align-items:center;margin-top:8px">
+            <input class="persist" id="${idDone}" type="checkbox"/> Mark done
+          </label>
+        </div>`);
+    });
+    wirePersist();
+
+    // ---------- Resilience Score Gauge ----------
+    const metrics = ['mTech','mSoft','mAdapt','mNet','mBrand','mAI'];
+    const ctx = document.getElementById('scoreDial').getContext('2d');
+    const bar = document.getElementById('scoreBar');
+    const scoreText = document.getElementById('scoreText');
+
+    function score(){
+      const vals = metrics.map(id => Number(document.getElementById(id).value || 0));
+      const avg = Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+      return avg;
+    }
+
+    function drawDial(){
+      const s = score();
+      scoreText.textContent = `Overall score: ${s}/100`;
+      bar.style.width = s + '%';
+
+      const w = ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h);
+      const cx=w/2, cy=h/2, r=90, th=16;
+      // background circle
+      ctx.lineWidth = th; ctx.strokeStyle = 'rgba(180,190,210,.25)';
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+      // arc
+      const grad = ctx.createLinearGradient(0,0,w,0);
+      grad.addColorStop(0,'#5dd4b6'); grad.addColorStop(1,'#6aa5ff');
+      ctx.strokeStyle = grad; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2, (-Math.PI/2) + (Math.PI*2)*(s/100)); ctx.stroke();
+      // text
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text');
+      ctx.font = '600 40px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(s, cx, cy);
+      ctx.font = '12px system-ui'; ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--muted');
+      ctx.fillText('Resilience', cx, cy+28);
+    }
+
+    metrics.forEach(id=>{
+      const el = document.getElementById(id);
+      el.addEventListener('input', ()=>{ saveField(el); drawDial(); });
+      loadField(el);
+    });
+    drawDial();
+
+    // ---------- Networking & Brand Lists ----------
+    function listFactory(listId, inputId, addBtnId, storageKey){
+      const list = document.getElementById(listId);
+      const input = document.getElementById(inputId);
+      const addBtn = document.getElementById(addBtnId);
+
+      function render(){
+        list.innerHTML='';
+        const items = JSON.parse(localStorage.getItem(storageKey)||'[]');
+        items.forEach((it,idx)=>{
+          const id = `${storageKey}_${idx}`;
+          list.insertAdjacentHTML('beforeend', `
+            <div class="check">
+              <input id="${id}" type="checkbox" ${it.done?'checked':''} />
+              <div>
+                <div class="title">${it.text}</div>
+                <div class="small muted">${it.note||''}</div>
+              </div>
+              <button class="btn small" data-idx="${idx}" title="Remove">−</button>
+            </div>`);
+        });
+        // wire events
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+          cb.addEventListener('change', ()=>{
+            const parts = cb.id.split('_'); const idx = Number(parts[parts.length-1]);
+            const items = JSON.parse(localStorage.getItem(storageKey)||'[]');
+            items[idx].done = cb.checked; localStorage.setItem(storageKey, JSON.stringify(items));
+          });
+        });
+        list.querySelectorAll('button[data-idx]').forEach(btn=>{
+          btn.addEventListener('click', ()=>{
+            const idx = Number(btn.getAttribute('data-idx'));
+            const items = JSON.parse(localStorage.getItem(storageKey)||'[]');
+            items.splice(idx,1); localStorage.setItem(storageKey, JSON.stringify(items)); render();
+          });
+        });
+      }
+
+      function addItem(){
+        const text = input.value.trim(); if(!text) return;
+        const items = JSON.parse(localStorage.getItem(storageKey)||'[]');
+        items.push({text, done:false});
+        localStorage.setItem(storageKey, JSON.stringify(items));
+        input.value=''; render();
+      }
+      addBtn.addEventListener('click', addItem);
+      input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ addItem(); }});
+
+      render();
+
+      return { render };
+    }
+
+    const net = listFactory('networkList','networkInput','addNetwork','planner:network');
+    const brand = listFactory('brandList','brandInput','addBrand','planner:brand');
+
+    // ---------- TOC active link ----------
+    const tocLinks = document.querySelectorAll('#toc a');
+    const obs = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          tocLinks.forEach(a=>a.classList.remove('active'));
+          const id = '#' + entry.target.id;
+          const link = document.querySelector(`#toc a[href="${id}"]`);
+          if(link) link.classList.add('active');
+        }
+      });
+    }, { threshold: .25 });
+    document.querySelectorAll('main section').forEach(sec=>obs.observe(sec));
+  </script>
+</body>
+</html>
